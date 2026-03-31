@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String          @id @default(cuid())
+  email        String          @unique
+  passwordHash String
+  role         Role            @default(MEMBER)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  profile      DentistProfile?
+
+  @@index([email])
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+// ─── Dentist Profile ─────────────────────────────────────────────────────────
+
+model DentistProfile {
+  id        String  @id @default(cuid())
+  slug      String  @unique
+  userId    String? @unique
+  user      User?   @relation(fields: [userId], references: [id])
+
+  // Basisdaten
+  title     String? // Dr., Prof. Dr. etc.
+  firstName String
+  lastName  String
+  suffix    String? // M.Sc., etc.
+  bio       String? @db.Text
+  imageUrl  String?
+
+  // Kontakt
+  phone   String?
+  email   String?
+  website String?
+
+  // Adresse
+  street  String?
+  zip     String?
+  city    String
+  region  String? // Bundesland / Kanton
+  country Country @default(DE)
+
+  // Koordinaten
+  lat Float?
+  lng Float?
+
+  // Öffnungszeiten (JSON)
+  openingHours Json?
+
+  // Directory
+  domains  Domain[]  @default([DE])
+  verified Boolean   @default(false)
+  featured Boolean   @default(false)
+  active   Boolean   @default(true)
+
+  // SEO
+  metaTitle String?
+  metaDesc  String?
+
+  categories  DentistCategory[]
+  socialLinks SocialLink[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([city])
+  @@index([country])
+  @@index([active])
+}
+
+enum Country {
+  DE
+  AT
+  CH
+  OTHER
+}
+
+enum Domain {
+  DE // mycleandent.de  – nur DACH
+  COM // mycleandent.com – international
+}
+
+// ─── Kategorien ──────────────────────────────────────────────────────────────
+
+model Category {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  name        String
+  nameEn      String?
+  iconUrl     String?
+  description String?
+  order       Int               @default(0)
+  doctors     DentistCategory[]
+}
+
+model DentistCategory {
+  dentist    DentistProfile @relation(fields: [dentistId], references: [id], onDelete: Cascade)
+  dentistId  String
+  category   Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String
+
+  @@id([dentistId, categoryId])
+}
+
+// ─── Social Links ─────────────────────────────────────────────────────────────
+
+model SocialLink {
+  id        String         @id @default(cuid())
+  dentist   DentistProfile @relation(fields: [dentistId], references: [id], onDelete: Cascade)
+  dentistId String
+  platform  SocialPlatform
+  url       String
+}
+
+enum SocialPlatform {
+  FACEBOOK
+  INSTAGRAM
+  LINKEDIN
+  XING
+  YOUTUBE
+}
+
+// ─── Blog / Wissenswert ───────────────────────────────────────────────────────
+
+model Post {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  title       String
+  excerpt     String?
+  content     String       @db.Text
+  imageUrl    String?
+  category    PostCategory @default(WISSENSWERT)
+  published   Boolean      @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([slug])
+  @@index([published])
+}
+
+enum PostCategory {
+  WISSENSWERT
+  NEWS
+}

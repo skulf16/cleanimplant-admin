@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import DoctorCard from "@/components/directory/DoctorCard";
 import type { DentistWithRelations } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ city: string }> };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

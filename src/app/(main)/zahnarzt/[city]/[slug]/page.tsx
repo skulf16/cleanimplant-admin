@@ -6,6 +6,8 @@ import { MapPin, Clock, MessageSquare } from "lucide-react";
 import GallerySlider from "@/components/doctor/GallerySlider";
 import ProfileTabs from "@/components/doctor/ProfileTabs";
 import ContactForm from "@/components/doctor/ContactForm";
+
+export const dynamic = "force-dynamic";
 import OpeningHoursStatus, { type OpeningHoursData } from "@/components/doctor/OpeningHoursStatus";
 
 // ── Language map (slug → { label, flag }) ────────────────────────────────────

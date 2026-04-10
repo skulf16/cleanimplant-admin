@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
-import { Open_Sans } from "next/font/google";
+import { Montserrat } from "next/font/google";
+import { auth } from "@/lib/auth";
+import SessionProvider from "@/components/layout/SessionProvider";
 import "./globals.css";
 
-const openSans = Open_Sans({
-  subsets: ["latin"],
+const montserrat = Montserrat({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-sans",
   display: "swap",
 });
@@ -29,14 +32,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
-    <html lang="de" className={`${openSans.variable} h-full`}>
-      <body className="min-h-full flex flex-col antialiased">{children}</body>
+    <html lang="de" className={`${montserrat.variable} h-full`}>
+      <body className="min-h-full flex flex-col antialiased" suppressHydrationWarning>
+        <SessionProvider session={session}>
+          {children}
+        </SessionProvider>
+      </body>
     </html>
   );
 }

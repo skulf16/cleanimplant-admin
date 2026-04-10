@@ -3,11 +3,47 @@ import { prisma } from "@/lib/prisma";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://mycleandent.de";
 
+function slugifyRegion(region: string): string {
+  return region
+    .toLowerCase()
+    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+const COUNTRY_SLUGS: Record<string, string> = { DE: "deutschland", AT: "oesterreich", CH: "schweiz" };
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const doctors = await prisma.dentistProfile.findMany({
-    select: { slug: true, updatedAt: true },
-    where: { active: true },
-  });
+  let doctors: { slug: string; citySlug: string; updatedAt: Date }[] = [];
+  let cities: { citySlug: string; updatedAt: Date }[] = [];
+  let regions: { region: string | null; updatedAt: Date }[] = [];
+  let countryCodes: { country: string | null; updatedAt: Date }[] = [];
+
+  try {
+    [doctors, cities, regions, countryCodes] = await Promise.all([
+      prisma.dentistProfile.findMany({
+        select: { slug: true, citySlug: true, updatedAt: true },
+        where: { active: true },
+      }),
+      prisma.dentistProfile.findMany({
+        where: { active: true, NOT: { citySlug: "" } },
+        select: { citySlug: true, updatedAt: true },
+        distinct: ["citySlug"],
+      }),
+      prisma.dentistProfile.findMany({
+        where: { active: true, NOT: { region: null } },
+        select: { region: true, updatedAt: true },
+        distinct: ["region"],
+      }),
+      prisma.dentistProfile.findMany({
+        where: { active: true, country: { in: ["DE", "AT", "CH"] } },
+        select: { country: true, updatedAt: true },
+        distinct: ["country"],
+      }),
+    ]);
+  } catch {
+    // DB not reachable during build — return static pages only
+  }
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${BASE_URL}/`, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
@@ -19,12 +55,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/kontakt`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.4 },
   ];
 
-  const doctorPages: MetadataRoute.Sitemap = doctors.map((doc: { slug: string; updatedAt: Date }) => ({
-    url: `${BASE_URL}/places/${doc.slug}`,
+  const countryPages: MetadataRoute.Sitemap = countryCodes
+    .filter((c) => c.country !== null && COUNTRY_SLUGS[c.country as string] !== undefined)
+    .map((c) => ({
+      url: `${BASE_URL}/zahnarzt/${COUNTRY_SLUGS[c.country as string]}`,
+      lastModified: c.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+    }));
+
+  const regionPages: MetadataRoute.Sitemap = regions
+    .filter((r): r is { region: string; updatedAt: Date } => r.region !== null && r.region !== "")
+    .map((r) => ({
+      url: `${BASE_URL}/zahnarzt/${slugifyRegion(r.region)}`,
+      lastModified: r.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.87,
+    }));
+
+  const cityPages: MetadataRoute.Sitemap = cities.map((c) => ({
+    url: `${BASE_URL}/zahnarzt/${c.citySlug}`,
+    lastModified: c.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.85,
+  }));
+
+  const doctorPages: MetadataRoute.Sitemap = doctors.map((doc) => ({
+    url: `${BASE_URL}/zahnarzt/${doc.citySlug}/${doc.slug}`,
     lastModified: doc.updatedAt,
-    changeFrequency: "weekly",
+    changeFrequency: "weekly" as const,
     priority: 0.8,
   }));
 
-  return [...staticPages, ...doctorPages];
+  return [...staticPages, ...countryPages, ...regionPages, ...cityPages, ...doctorPages];
 }

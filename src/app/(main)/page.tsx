@@ -1,244 +1,408 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Search, MapPin, ShieldCheck, Star } from "lucide-react";
+import Image from "next/image";
+import { Search, MapPin } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { buildDoctorName } from "@/lib/utils";
+import FaqAccordion from "@/components/home/FaqAccordion";
+import WhiteAccordion from "@/components/home/WhiteAccordion";
+import DoctorCarousel from "@/components/home/DoctorCarousel";
 
 export const metadata: Metadata = {
-  title: "mycleandent – Zahnärzte & Implantologen in Ihrer Nähe",
+  title: "mycleandent – Finden Sie Ihre CleanImplant-zertifizierte Zahnarztpraxis",
   description:
     "Finden Sie zertifizierte Zahnärzte und Implantologen in Ihrer Nähe. Geprüfte Profile aus Deutschland, Österreich und der Schweiz.",
 };
 
-async function getStats() {
-  const [doctorCount, cityCount] = await Promise.all([
-    prisma.dentistProfile.count({ where: { active: true } }),
-    prisma.dentistProfile.groupBy({ by: ["city"], where: { active: true } }).then((r: unknown[]) => r.length),
-  ]);
-  return { doctorCount, cityCount };
-}
-
 async function getFeaturedDoctors() {
   return prisma.dentistProfile.findMany({
-    where: { active: true, featured: true },
-    take: 6,
-    include: { categories: { include: { category: true } } },
-    orderBy: { updatedAt: "desc" },
+    where: { active: true },
+    take: 15,
+    select: {
+      id: true, slug: true, citySlug: true, firstName: true, lastName: true,
+      title: true, suffix: true, street: true, zip: true,
+      city: true, country: true, imageUrl: true, openingHours: true,
+      categories: { include: { category: true } },
+    },
+    orderBy: { createdAt: "desc" },
   });
 }
 
-const categories = [
-  { slug: "zahnarzt", label: "Zahnarzt", icon: "🦷" },
-  { slug: "implantologe", label: "Implantologe", icon: "⚙️" },
-  { slug: "kieferchirurg", label: "Kieferchirurg", icon: "🏥" },
-  { slug: "kieferorthopaedie", label: "Kieferorthopädie", icon: "😬" },
-  { slug: "parodontologie", label: "Parodontologie", icon: "🔬" },
-  { slug: "aesthetische-zahnmedizin", label: "Ästhetische Zahnmedizin", icon: "✨" },
+const usps = [
+  {
+    title: "Kontrolliert",
+    text: "Verwendung von Implantat-Systemen, die in unabhängigen, akkreditierten Prüflaboren auf hohe Sauberkeit überprüft wurden.",
+  },
+  {
+    title: "Konsequent",
+    text: "Zertifizierte Implantate und schonende Methoden für einen optimalen Heilungsverlauf und einen hochwertigen Zahnersatz.",
+  },
+  {
+    title: "Kompetent",
+    text: "Starkes Engagement für höchste Standards in der Patientenbehandlung.",
+  },
+  {
+    title: "Klar",
+    text: "Individualität und Wohlbefinden der Patienten im Fokus.",
+  },
 ];
 
+const werWirSindItems = [
+  {
+    q: "Was geprüft wird",
+    a: "Die CleanImplant Foundation ist eine international anerkannte, unabhängige Institution, die sich mit der Bewertung der Sauberkeit von Zahnimplantaten befasst. Durch umfangreiche wissenschaftliche Tests und eigene Zertifizierungsprozesse untersucht die Stiftung Implantatsysteme anhand definierter Kriterien auf bestimmte Oberflächeneigenschaften und mögliche Produktionsrückstände. Die Ergebnisse dieser Prüfungen sowie die CleanImplant Qualitätsauszeichnung dienen der transparenzschaffenden Information von Zahnärztinnen und Zahnärzten und können diese bei der Auswahl von Implantatsystemen unterstützen. Das Prüfverfahren erfolgt ergänzend zu bestehenden gesetzlichen Zulassungsanforderungen und behördlichen Konformitätsprüfungen.",
+  },
+  {
+    q: "Wissenschaftliche Grundlage",
+    a: "Unterstützt wird die Arbeit der Stiftung durch einen internationalen wissenschaftlichen Beirat. Dieses Expertengremium definiert die Grenzwerte für einen besonders hohen Standard zur Sauberkeit von Implantaten, begleitet die Prüfungen und sorgt dafür, dass die Ergebnisse fachlich fundiert und überprüft sind. Durch den Austausch mit Zahnärzten, Kliniken und Fachgesellschaften entsteht ein starkes Netzwerk, das Qualität von Medizinprodukten und Sicherheit für Patienten in den Mittelpunkt stellt. Dieses Expertengremium definiert die Prüfkriterien und Grenzwerte für das CleanImplant-Prüfverfahren für besondere Sauberkeit, begleitet die Prüfungen und stellt sicher, dass die Ergebnisse fachlich fundiert und überprüfbar sind.",
+  },
+  {
+    q: "Die Bedeutung für Patienten",
+    a: "Über mycleandent finden Sie Zahnärzte und Kliniken, die nach den geprüften Standards des CleanImplant-Verfahrens arbeiten. Jede bei uns gelistete Praxis verwendet Implantate, die über die gesetzlichen Zulassungsanforderungen hinaus die Kriterien der CleanImplant-Konsensus-Richtlinie erfüllen und die im Rahmen des CleanImplant-Prüfverfahrens definierten Grenzwerte für besonders hohe Sauberkeit einhalten. Das gibt Ihnen Vertrauen und Klarheit bei einer Entscheidung, die für Ihre Gesundheit und Wohlbefinden von unschätzbarem Wert ist.",
+  },
+];
+
+const faqItems = [
+  { q: "Was genau ist ein Zahnimplantat?",               a: "Ein Zahnimplantat ist ein aus Titan/Keramik gefertigter, chirurgisch in den Kieferknochen eingesetzter Stift, der eine fehlende Zahnwurzel ersetzt und eine Krone, Brücke oder Prothese trägt." },
+  { q: "Bin ich ein guter Kandidat für Zahnimplantate?",  a: "Sie sind ein guter Kandidat, wenn Sie über ausreichende Kieferknochendichte, gesundes Zahnfleisch und einen guten allgemeinen Gesundheitszustand verfügen. Bei Rauchern oder Menschen mit bestimmten Erkrankungen kann eine zusätzliche Untersuchung erforderlich sein." },
+  { q: "Wie lange halten Zahnimplantate?",                a: "Bei richtiger Pflege können Zahnimplantate ein Leben lang halten, während die Krone alle 10 bis 15 Jahre ausgetauscht werden muss." },
+  { q: "Sind Zahnimplantate sicher?",                     a: "Ja, Zahnimplantate sind ein bewährtes und sicheres Verfahren mit einer hohen Erfolgsquote, wenn sie von einem qualifizierten Facharzt durchgeführt werden." },
+  { q: "Wie lange dauert der gesamte Prozess?",           a: "Der gesamte Prozess kann mehrere Monate in Anspruch nehmen, da er eine Operation, eine Heilungsphase (3–6 Monate für die Osseointegration) und das Einsetzen der endgültigen Krone umfasst. In bestimmten Fällen kann auch eine sofortige Implantation mit einer provisorischen Krone möglich sein." },
+  { q: "Ist der Eingriff für ein Zahnimplantat schmerzhaft?", a: "Der Eingriff wird unter örtlicher Betäubung durchgeführt, sodass nur minimale Schmerzen zu erwarten sind. Leichte Beschwerden, Schwellungen und Blutergüsse können danach auftreten, lassen sich jedoch gut mit Schmerzmitteln behandeln." },
+  { q: "Welche Schritte sind bei einem Zahnimplantat erforderlich?", a: "Der Ablauf umfasst eine Erstberatung, die chirurgische Implantation, eine Heilungsphase zur Knochenintegration und schließlich das Befestigen des Zahnersatzes (der Krone)." },
+  { q: "Werde ich während der Heilungsphase eine Lücke im Lächeln haben?", a: "Je nach Situation kann ein provisorischer Zahnersatz eingesetzt werden, bis die endgültige Krone befestigt wird." },
+  { q: "Wie lange dauert die Erholungsphase nach einer Zahnimplantat-Operation?", a: "Die anfängliche Heilung dauert etwa eine Woche, aber die vollständige Integration des Implantats in den Knochen (Osseointegration) benötigt etwa 3–6 Monate." },
+];
+
+const blogPosts = [
+  { title: "Wie funktioniert ein Implantat?",            href: "/wissenswert/wie-funktioniert-ein-implantat", color: "#e8f0f5", image: "https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/illu-1.jpg" },
+  { title: "Die Vorteile einer Implantatversorgung",     href: "/wissenswert/vorteile-implantatversorgung",   color: "#f5ede8", image: "https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/illu-13.jpg" },
+  { title: "Wie Zahnimplantate sich unterscheiden",      href: "/wissenswert/zahnimplantate-unterschiede",    color: "#eaf5e8", image: "https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/illu-12.jpg" },
+];
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  border: "1px solid #F4907B",
+  borderRadius: 8,
+  padding: "13px 16px 13px 40px",
+  fontSize: 14,
+  fontWeight: 500,
+  color: "#00385E",
+  background: "#fff",
+  outline: "none",
+  fontFamily: "inherit",
+  boxSizing: "border-box",
+};
+
 export default async function HomePage() {
-  const [stats, featured] = await Promise.all([getStats(), getFeaturedDoctors()]);
+  const doctors = await getFeaturedDoctors();
 
   return (
     <>
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-[#2EA3F2] to-[#1a8fd8] text-white py-16 md:py-24">
-        <div className="max-w-[1080px] mx-auto px-4 text-center">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight text-white">
-            Zahnärzte & Implantologen<br className="hidden md:block" /> in Ihrer Nähe
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <section
+        style={{
+          marginTop: "-72px",
+          minHeight: "60vh",
+          backgroundImage: "url('https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/mycleandent-bg-hero.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ width: "100%", maxWidth: 780, margin: "0 auto", padding: "100px 24px 60px", textAlign: "center" }}>
+          <h1 style={{ color: "#fff", fontSize: "clamp(24px, 4vw, 52px)", fontWeight: 700, lineHeight: 1.2, marginBottom: 36 }}>
+            Finden Sie Ihre
+            <br />
+            CleanImplant-zertifizierte Zahnarztpraxis
           </h1>
-          <p className="text-lg text-blue-100 mb-10 max-w-2xl mx-auto">
-            Finden Sie zertifizierte Zahnärzte in Deutschland, Österreich und der Schweiz.
-            Geprüfte Profile – direkt und kostenlos.
-          </p>
-
-          {/* Search */}
+          {/* Search form: stacks vertically on mobile, row on sm+ */}
           <form
             action="/zahnarzt-finden"
             method="get"
-            className="max-w-2xl mx-auto"
+            className="flex flex-col sm:flex-row sm:items-center gap-3"
+            style={{ background: "#FDF5F2", borderRadius: 12, padding: "16px 20px" }}
           >
-            <div className="flex flex-col sm:flex-row gap-2 bg-white rounded-lg p-2 shadow-lg">
-              <div className="flex items-center flex-1 gap-2 px-3">
-                <Search size={18} className="text-gray-400 flex-shrink-0" />
-                <input
-                  type="text"
-                  name="q"
-                  placeholder="Name oder Fachrichtung..."
-                  className="flex-1 text-[14px] text-gray-700 outline-none placeholder-gray-400"
-                />
-              </div>
-              <div className="flex items-center flex-1 gap-2 px-3 border-l border-gray-200">
-                <MapPin size={18} className="text-gray-400 flex-shrink-0" />
-                <input
-                  type="text"
-                  name="city"
-                  placeholder="Stadt oder PLZ..."
-                  className="flex-1 text-[14px] text-gray-700 outline-none placeholder-gray-400"
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-[#2EA3F2] hover:bg-[#1a8fd8] text-white font-semibold px-8 py-3 rounded-md transition-colors text-[14px] whitespace-nowrap"
-              >
-                Suchen
-              </button>
+            {/* Name / Praxis field */}
+            <div style={{ position: "relative", flex: 2, minWidth: 0 }}>
+              <Search size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "#F4907B", pointerEvents: "none" }} />
+              <input type="text" name="q" placeholder="Suchen nach (Name, Praxis, Zahnarzt)" style={inputStyle} />
             </div>
+            {/* Ort field */}
+            <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
+              <MapPin size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "#F4907B", pointerEvents: "none" }} />
+              <input type="text" name="city" placeholder="Nach Ort suchen" style={inputStyle} />
+            </div>
+            <button
+              type="submit"
+              className="btn-coral w-full sm:w-[50px] flex-shrink-0"
+              style={{ background: "#F4907B", color: "#fff", border: "none", borderRadius: 8, height: 50, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", gap: 8, fontWeight: 700, fontSize: 14, fontFamily: "inherit" }}
+              aria-label="Suchen"
+            >
+              <Search size={18} />
+              <span className="sm:hidden">Suchen</span>
+            </button>
           </form>
-
-          {/* Stats */}
-          <div className="flex justify-center gap-8 mt-10 text-blue-100">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-white">{stats.doctorCount}+</div>
-              <div className="text-sm">geprüfte Ärzte</div>
-            </div>
-            <div className="w-px bg-blue-300/30" />
-            <div className="text-center">
-              <div className="text-3xl font-bold text-white">{stats.cityCount}+</div>
-              <div className="text-sm">Städte & Regionen</div>
-            </div>
-            <div className="w-px bg-blue-300/30" />
-            <div className="text-center">
-              <div className="text-3xl font-bold text-white">3</div>
-              <div className="text-sm">Länder (DACH)</div>
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* Kategorien */}
-      <section className="py-14 bg-white">
-        <div className="max-w-[1080px] mx-auto px-4">
-          <h2 className="text-2xl font-bold text-center text-[#333] mb-8">
-            Fachrichtungen
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-            {categories.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/zahnarzt-finden?category=${cat.slug}`}
-                className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#2EA3F2] hover:shadow-md transition-all group text-center"
-              >
-                <span className="text-3xl">{cat.icon}</span>
-                <span className="text-[13px] font-medium text-[#666] group-hover:text-[#2EA3F2] transition-colors leading-tight">
-                  {cat.label}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Doctors */}
-      {featured.length > 0 && (
-        <section className="py-14 bg-[#f8f9fa]">
-          <div className="max-w-[1080px] mx-auto px-4">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-[#333]">
-                Empfohlene Ärzte
-              </h2>
-              <Link
-                href="/zahnarzt-finden"
-                className="text-[13px] text-[#2EA3F2] hover:underline"
-              >
-                Alle anzeigen →
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-              {featured.map((doc: typeof featured[0]) => (
-                <Link
-                  key={doc.id}
-                  href={`/places/${doc.slug}`}
-                  className="bg-white rounded-lg border border-gray-200 hover:shadow-md hover:border-[#2EA3F2] transition-all p-5 flex gap-4"
-                >
-                  <div className="w-14 h-14 rounded-full bg-[#e8f5fe] flex-shrink-0 overflow-hidden flex items-center justify-center">
-                    {doc.imageUrl ? (
-                      <img
-                        src={doc.imageUrl}
-                        alt={buildDoctorName(doc.title, doc.firstName, doc.lastName, doc.suffix)}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-[#2EA3F2] font-bold text-lg">
-                        {doc.firstName[0]}{doc.lastName[0]}
-                      </span>
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="font-semibold text-[14px] text-[#333] truncate">
-                      {buildDoctorName(doc.title, doc.firstName, doc.lastName, doc.suffix)}
-                    </h3>
-                    <p className="text-[13px] text-[#666] mt-0.5 flex items-center gap-1">
-                      <MapPin size={12} className="flex-shrink-0" />
-                      {doc.city}{doc.country !== "DE" ? `, ${doc.country}` : ""}
-                    </p>
-                    {doc.categories.length > 0 && (
-                      <p className="text-[12px] text-[#2EA3F2] mt-1 truncate">
-                        {doc.categories[0].category.name}
-                      </p>
-                    )}
-                    {doc.verified && (
-                      <span className="inline-flex items-center gap-1 text-[11px] text-green-600 mt-1">
-                        <ShieldCheck size={11} /> Verifiziert
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* USPs */}
-      <section className="py-14 bg-white">
-        <div className="max-w-[1080px] mx-auto px-4">
-          <h2 className="text-2xl font-bold text-center text-[#333] mb-10">
-            Warum mycleandent?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <ShieldCheck size={32} className="text-[#2EA3F2]" />,
-                title: "Geprüfte Profile",
-                text: "Alle Arztprofile werden von unserem Team manuell geprüft und verifiziert.",
-              },
-              {
-                icon: <MapPin size={32} className="text-[#2EA3F2]" />,
-                title: "Regional & Präzise",
-                text: "Finden Sie Ärzte nach Stadt, Region oder Land – im gesamten DACH-Raum.",
-              },
-              {
-                icon: <Star size={32} className="text-[#2EA3F2]" />,
-                title: "Kostenlos für Patienten",
-                text: "Die Suche und alle Profilinformationen sind für Patienten vollständig kostenlos.",
-              },
-            ].map((usp) => (
-              <div key={usp.title} className="text-center px-4">
-                <div className="flex justify-center mb-4">{usp.icon}</div>
-                <h3 className="text-lg font-semibold text-[#333] mb-2">{usp.title}</h3>
-                <p className="text-[14px] text-[#666] leading-relaxed">{usp.text}</p>
+      {/* ── 4 USPs ───────────────────────────────────────────── */}
+      <section style={{ background: "#FDF5F2", padding: "60px 0" }}>
+        <div style={{ width: "90%", margin: "0 auto", position: "relative" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 px-2 lg:px-12">
+            {usps.map(({ title, text }, i) => (
+              <div key={title} style={{ textAlign: "left", position: "relative" }}>
+                {i === 0 && (
+                  <Image
+                    src="https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/clean.png"
+                    alt=""
+                    width={260}
+                    height={260}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      objectPosition: "right center",
+                      zIndex: 0,
+                      pointerEvents: "none",
+                      userSelect: "none",
+                    }}
+                    aria-hidden
+                  />
+                )}
+                {i === 3 && (
+                  <Image
+                    src="https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/siegel.png"
+                    alt=""
+                    width={260}
+                    height={260}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      objectPosition: "right center",
+                      zIndex: 0,
+                      pointerEvents: "none",
+                      userSelect: "none",
+                    }}
+                    aria-hidden
+                  />
+                )}
+                {i === 2 && (
+                  <Image
+                    src="https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/controlled.png"
+                    alt=""
+                    width={260}
+                    height={260}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      objectPosition: "right center",
+                      zIndex: 0,
+                      pointerEvents: "none",
+                      userSelect: "none",
+                    }}
+                    aria-hidden
+                  />
+                )}
+                {i === 1 && (
+                  <Image
+                    src="https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/committed.png"
+                    alt=""
+                    width={260}
+                    height={260}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      objectPosition: "right center",
+                      zIndex: 0,
+                      pointerEvents: "none",
+                      userSelect: "none",
+                    }}
+                    aria-hidden
+                  />
+                )}
+                <div style={{ position: "relative", zIndex: 1 }}>
+                  <h3 style={{ color: "#F4907B", fontSize: 24, fontWeight: 700, marginBottom: 12, marginTop: 0 }}>{title}</h3>
+                  <p style={{ color: "#00385E", fontSize: 14, lineHeight: 1.7, margin: 0 }}>{text}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Mitglied werden */}
-      <section className="py-14 bg-[#F5907C]">
-        <div className="max-w-[1080px] mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-            Sie sind Zahnarzt?
+      {/* ── Willkommen bei mycleandent ────────────────────────── */}
+      <section style={{ background: "#FDF5F2", padding: "72px 0" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            <div style={{ position: "relative", width: "100%", aspectRatio: "4/3", borderRadius: 12, overflow: "hidden" }}>
+              <Image src="https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/mycleandent-willkommen.png" alt="Willkommen bei mycleandent" fill style={{ objectFit: "cover" }} />
+            </div>
+            <div>
+              <h2 style={{ color: "#BEC4AB", fontSize: "clamp(22px, 3vmax, 42px)", fontWeight: 600, lineHeight: "1.2em", marginBottom: 20, marginTop: 0 }}>
+                Willkommen bei <strong>mycleandent</strong>
+              </h2>
+              <p style={{ color: "#00385E", fontSize: 14, lineHeight: 1.8, marginBottom: 16 }}>
+                Bei uns finden Sie schnell und einfach Zahnärzte und Kliniken, die von CleanImplant zertifiziert sind. Unser Ziel ist es, Ihnen Sicherheit und Transparenz zu geben – damit Sie ganz entspannt den richtigen Behandler für Ihr gesundes Lächeln wählen können. Alle bei uns gelisteten Praxen arbeiten mit von der unabhängigen CleanImplant Foundation ausgezeichneten Implantatsystemen. Vertrauen Sie bei Ihrer Behandlung auf die aufwendig überprüfte Reinheit und Qualität. Mit unserer benutzerfreundlichen Suche finden Sie mühelos zertifizierte Zahnärzte in Ihrer Nähe. Unser Formular erleichtert Ihnen die direkte und schnelle Kontaktaufnahme.
+              </p>
+              <p style={{ color: "#00385E", fontSize: 14, fontWeight: 700, margin: 0 }}>
+                Qualität, Sicherheit und Vertrauen – CleanImplant Certified Dentists.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Wer wir sind ─────────────────────────────────────── */}
+      <section style={{ background: "#FDF5F2", padding: "72px 0" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+            {/* Left: text + accordion — on mobile comes after image */}
+            <div className="order-2 lg:order-1">
+              <h2 style={{ color: "#BEC4AB", fontSize: "clamp(22px, 3vmax, 42px)", fontWeight: 600, lineHeight: "1.2em", marginTop: 0, marginBottom: 16 }}>
+                Wer wir sind
+              </h2>
+              <p style={{ color: "#00385E", fontSize: 14, fontWeight: 700, lineHeight: 1.75, marginBottom: 12 }}>
+                mycleandent – Ihre Plattform für geprüfte Qualität in der Implantologie auf Grundlage des unabhängigen CleanImplant-Prüfverfahrens.
+              </p>
+              <p style={{ color: "#00385E", fontSize: 14, lineHeight: 1.75, marginBottom: 0 }}>
+                mycleandent wurde von der renommierten CleanImplant Foundation ins Leben gerufen, um Patienten mit qualifizierten Zahnärzten und modernen Implantatlösungen zu verbinden. Unser Anspruch ist es, Orientierung zu geben und den Zugang zu den von uns qualifizierten Behandlungseinrichtungen zu erleichtern.
+              </p>
+              <WhiteAccordion items={werWirSindItems} />
+            </div>
+
+            {/* Right: image — on mobile comes first */}
+            <div className="order-1 lg:order-2" style={{ position: "relative", width: "100%", aspectRatio: "4/3", borderRadius: 12, overflow: "hidden" }}>
+              <Image src="https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/illu-2.png" alt="Wer wir sind" fill style={{ objectFit: "cover" }} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Neue zertifizierte Praxen ────────────────────────── */}
+      <section
+        style={{
+          padding: "72px 0",
+          backgroundImage: "url('https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/mycleandent-bg-hero.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          position: "relative",
+        }}
+      >
+        <div style={{ position: "relative", maxWidth: 1400, margin: "0 auto", padding: "0 24px" }}>
+          <h2 style={{ color: "#fff", fontSize: "clamp(22px, 3vmax, 42px)", fontWeight: 700, textAlign: "center", marginBottom: 40, marginTop: 0 }}>
+            Neue zertifizierte Praxen
           </h2>
-          <p className="text-white/90 mb-8 max-w-xl mx-auto text-[15px]">
-            Erstellen Sie Ihr Profil auf mycleandent und werden Sie von tausenden Patienten gefunden.
-          </p>
-          <Link
-            href="/join-us"
-            className="inline-block bg-white text-[#F5907C] font-semibold px-8 py-3 rounded-lg hover:shadow-lg transition-all text-[15px]"
-          >
-            Jetzt Mitglied werden
-          </Link>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <DoctorCarousel doctors={doctors as any} />
+          <div style={{ textAlign: "center", marginTop: 40 }}>
+            <Link
+              href="/zahnarzt-finden"
+              className="btn-coral"
+              style={{
+                display: "inline-block",
+                background: "#F4907B",
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: 13,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                padding: "12px 32px",
+                borderRadius: 8,
+                textDecoration: "none",
+              }}
+            >
+              Finden Sie Ihre Praxis in der Nähe
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Wissenswertes ────────────────────────────────────── */}
+      <section style={{ background: "#FDF5F2", padding: "72px 0" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+          <h2 style={{ color: "#BEC4AB", fontSize: "clamp(22px, 3vmax, 42px)", fontWeight: 700, textAlign: "center", marginBottom: 40, marginTop: 0 }}>
+            Wissenswertes
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {blogPosts.map((post) => (
+              <Link
+                key={post.href}
+                href={post.href}
+                style={{ display: "block", borderRadius: 10, overflow: "hidden", textDecoration: "none", background: "#fff", transition: "box-shadow 0.2s" }}
+                className="hover:shadow-md"
+              >
+                <div style={{ background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative", aspectRatio: "4/3" }}>
+                  {(post as typeof post & { image?: string }).image ? (
+                    <Image
+                      src={(post as typeof post & { image?: string }).image!}
+                      alt={post.title}
+                      fill
+                      style={{ objectFit: "contain" }}
+                    />
+                  ) : (
+                    <svg viewBox="0 0 120 80" style={{ width: 128, opacity: 0.4 }}>
+                      <rect x="10" y="10" width="100" height="60" rx="8" fill="#BEC4AB" />
+                      <circle cx="40" cy="40" r="20" fill="#F4907B" />
+                      <path d="M70 30h30M70 45h25M70 55h20" stroke="white" strokeWidth="4" strokeLinecap="round" />
+                    </svg>
+                  )}
+                </div>
+                <div style={{ padding: 16 }}>
+                  <h3 style={{ fontSize: 22, fontWeight: 600, color: "#F4907B", lineHeight: 1.3, margin: 0, textAlign: "center" }}>{post.title}</h3>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div style={{ textAlign: "center", marginTop: 32 }}>
+            <Link
+              href="/wissenswert"
+              className="btn-coral"
+              style={{
+                display: "inline-block",
+                background: "#F4907B",
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: 13,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                padding: "12px 32px",
+                borderRadius: 8,
+                textDecoration: "none",
+              }}
+            >
+              Weitere Beiträge
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ──────────────────────────────────────────────── */}
+      <section id="faq" style={{
+          padding: "72px 0",
+          backgroundImage: "url('https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/mycleandent-bg-hero.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+          <h2 style={{ color: "#fff", fontSize: "clamp(22px, 3vmax, 42px)", fontWeight: 600, lineHeight: "1.2em", textAlign: "center", marginBottom: 40, marginTop: 0 }}>
+            Fragen &amp; Antworten
+          </h2>
+          <div style={{ maxWidth: 800, margin: "0 auto" }}>
+            <FaqAccordion items={faqItems} />
+          </div>
         </div>
       </section>
     </>

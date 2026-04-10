@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ShieldCheck, Plus } from "lucide-react";
+import SyncEmailsButton from "@/components/admin/SyncEmailsButton";
 
 export default async function AdminDoctorsPage({
   searchParams,
@@ -31,12 +32,15 @@ export default async function AdminDoctorsPage({
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-[#333]">Arztprofile</h1>
-        <Link
-          href="/admin/doctors/new"
-          className="flex items-center gap-2 bg-[#2EA3F2] text-white px-4 py-2 rounded text-[13px] font-semibold hover:bg-[#1a8fd8] transition-colors"
-        >
-          <Plus size={15} /> Neues Profil
-        </Link>
+        <div className="flex items-center gap-3">
+          <SyncEmailsButton />
+          <Link
+            href="/admin/doctors/new"
+            className="flex items-center gap-2 bg-[#30A2F1] !text-white px-4 py-2 rounded text-[13px] font-semibold hover:bg-[#1a8fd8] transition-colors"
+          >
+            <Plus size={15} /> Neues Profil
+          </Link>
+        </div>
       </div>
 
       {/* Filter */}
@@ -46,12 +50,12 @@ export default async function AdminDoctorsPage({
           name="q"
           defaultValue={params.q}
           placeholder="Name oder Stadt..."
-          className="border border-gray-300 rounded px-3 py-2 text-[13px] focus:outline-none focus:border-[#2EA3F2] w-56"
+          className="border border-gray-300 rounded px-3 py-2 text-[13px] focus:outline-none focus:border-[#30A2F1] w-56"
         />
         <select
           name="country"
           defaultValue={params.country ?? ""}
-          className="border border-gray-300 rounded px-3 py-2 text-[13px] focus:outline-none focus:border-[#2EA3F2]"
+          className="border border-gray-300 rounded px-3 py-2 text-[13px] focus:outline-none focus:border-[#30A2F1]"
         >
           <option value="">Alle Länder</option>
           <option value="DE">Deutschland</option>
@@ -60,7 +64,7 @@ export default async function AdminDoctorsPage({
         </select>
         <button
           type="submit"
-          className="bg-[#2EA3F2] text-white px-4 py-2 rounded text-[13px] hover:bg-[#1a8fd8] transition-colors"
+          className="bg-[#30A2F1] text-white px-4 py-2 rounded text-[13px] hover:bg-[#1a8fd8] transition-colors"
         >
           Suchen
         </button>
@@ -93,7 +97,7 @@ export default async function AdminDoctorsPage({
                   <p className="text-[12px] text-[#999]">/{doc.slug}</p>
                 </td>
                 <td className="px-5 py-3.5 text-[13px] text-[#666]">
-                  {doc.city}, {doc.country}
+                  {doc.city}{doc.country ? `, ${({ DE: "Deutschland", AT: "Österreich", CH: "Schweiz" } as Record<string,string>)[doc.country] ?? doc.country}` : ""}
                 </td>
                 <td className="px-5 py-3.5">
                   <div className="flex gap-1">
@@ -122,7 +126,7 @@ export default async function AdminDoctorsPage({
                 <td className="px-5 py-3.5 text-right">
                   <Link
                     href={`/admin/doctors/${doc.id}`}
-                    className="text-[13px] text-[#2EA3F2] hover:underline"
+                    className="text-[13px] text-[#30A2F1] hover:underline"
                   >
                     Bearbeiten
                   </Link>

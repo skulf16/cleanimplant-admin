@@ -1,106 +1,115 @@
 import Link from "next/link";
+import Image from "next/image";
 
-const footerLinks = {
-  directory: [
-    { href: "/zahnarzt-finden", label: "Zahnarzt finden" },
-    { href: "/zahnarzt-finden?country=DE", label: "Zahnärzte Deutschland" },
-    { href: "/zahnarzt-finden?country=AT", label: "Zahnärzte Österreich" },
-    { href: "/zahnarzt-finden?country=CH", label: "Zahnärzte Schweiz" },
-  ],
-  info: [
-    { href: "/was-wir-tun", label: "Was wir tun" },
-    { href: "/join-us", label: "Mitglied werden" },
-    { href: "/wissenswert", label: "Wissenswert" },
-    { href: "/faq", label: "FAQ" },
-    { href: "/kontakt", label: "Kontakt" },
-  ],
-  legal: [
-    { href: "/impressum", label: "Impressum" },
-    { href: "/datenschutz", label: "Datenschutz" },
-    { href: "/terms-and-conditions", label: "AGB" },
-  ],
-};
+const footerSections = [
+  {
+    heading: "Für Patienten",
+    links: [
+      { href: "/wissenswert", label: "News & Beiträge" },
+      { href: "/#faq", label: "FAQ" },
+    ],
+  },
+  {
+    heading: "Für Zahnärzte",
+    links: [
+      { href: "https://member.cleanimplant.com/", label: "Login" },
+      { href: "https://member.cleanimplant.com/support/", label: "Mitglieder Support" },
+      { href: "https://cleanimplant.com/de/certified-approved/dentists-clinics/", label: "Noch nicht gelistet?" },
+    ],
+  },
+  {
+    heading: "Infos & Rechtliches",
+    links: [
+      { href: "/impressum", label: "Impressum" },
+      { href: "/datenschutz", label: "Datenschutz" },
+    ],
+  },
+];
 
 export default function Footer() {
   return (
-    <footer className="bg-[#333] text-white mt-auto">
-      <div className="max-w-[1080px] mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="md:col-span-1">
-            <span className="text-xl font-bold text-[#2EA3F2]">
-              my<span className="text-white">clean</span>dent
-            </span>
-            <p className="mt-3 text-[13px] text-gray-400 leading-relaxed">
-              Ihr Verzeichnis für zertifizierte Zahnärzte und Implantologen in Deutschland, Österreich und der Schweiz.
-            </p>
+    <footer style={{ background: "#BEC4AB", padding: "40px 24px" }}>
+      {/* Card */}
+      <div
+        style={{
+          maxWidth: 1100,
+          margin: "0 auto",
+          background: "#FDFAF6",
+          borderRadius: 16,
+          padding: "40px 48px",
+        }}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-10 sm:gap-8 items-start">
+
+          {/* Logo */}
+          <div className="flex items-center justify-start sm:justify-start">
+            <Link href="/">
+              <Image
+                src="https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/mycleandent-logo.png"
+                alt="mycleandent"
+                width={180}
+                height={60}
+                style={{ width: "auto", height: 56, objectFit: "contain", filter: "brightness(0) saturate(100%) invert(76%) sepia(8%) saturate(470%) hue-rotate(58deg) brightness(92%) contrast(88%)" }}
+              />
+            </Link>
           </div>
 
-          {/* Directory */}
-          <div>
-            <h5 className="text-[13px] font-semibold text-gray-300 uppercase tracking-wider mb-4">
-              Verzeichnis
-            </h5>
-            <ul className="space-y-2">
-              {footerLinks.directory.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-[13px] text-gray-400 hover:text-[#2EA3F2] transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Info */}
-          <div>
-            <h5 className="text-[13px] font-semibold text-gray-300 uppercase tracking-wider mb-4">
-              Informationen
-            </h5>
-            <ul className="space-y-2">
-              {footerLinks.info.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-[13px] text-gray-400 hover:text-[#2EA3F2] transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h5 className="text-[13px] font-semibold text-gray-300 uppercase tracking-wider mb-4">
-              Rechtliches
-            </h5>
-            <ul className="space-y-2">
-              {footerLinks.legal.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-[13px] text-gray-400 hover:text-[#2EA3F2] transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Link columns */}
+          {footerSections.map((section) => (
+            <div key={section.heading}>
+              <h5
+                style={{
+                  color: "#F4907B",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                  marginTop: 0,
+                  marginBottom: 16,
+                }}
+              >
+                {section.heading}
+              </h5>
+              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+                {section.links.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      {...(link.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      style={{
+                        color: "#00385E",
+                        fontSize: 13,
+                        fontWeight: 500,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                        textDecoration: "none",
+                      }}
+                      className="hover:text-[#F4907B] transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-10 pt-6 border-t border-gray-700 flex flex-col md:flex-row justify-between items-center gap-3">
-          <p className="text-[12px] text-gray-500">
+        {/* Bottom bar */}
+        <div
+          style={{
+            marginTop: 36,
+            paddingTop: 20,
+            borderTop: "1px solid #e8e2d8",
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            alignItems: "center",
+            textAlign: "center",
+          }}
+        >
+          <p style={{ margin: 0, fontSize: 12, color: "#999" }}>
             © {new Date().getFullYear()} mycleandent – Alle Rechte vorbehalten
-          </p>
-          <p className="text-[12px] text-gray-600">
-            Ein Projekt von{" "}
-            <span className="text-gray-500">Fluks Media</span>
           </p>
         </div>
       </div>

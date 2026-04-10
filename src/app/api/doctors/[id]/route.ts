@@ -12,15 +12,13 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params;
   const userRole = (session.user as { role?: string }).role;
 
-  // Mitglieder dürfen nur ihr eigenes Profil abrufen
+  // Mitglieder dürfen nur ihre eigenen Profile abrufen
   if (userRole !== "ADMIN") {
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id as string },
-      include: { profile: true },
+    const owns = await prisma.dentistProfile.findFirst({
+      where: { id, userId: session.user.id as string },
+      select: { id: true },
     });
-    if (!user?.profile || user.profile.id !== id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    if (!owns) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const doctor = await prisma.dentistProfile.findUnique({
@@ -43,15 +41,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { id } = await params;
   const userRole = (session.user as { role?: string }).role;
 
-  // Admins dürfen alles, Mitglieder nur ihr Profil (begrenzte Felder)
+  // Admins dürfen alles, Mitglieder nur ihre eigenen Profile (begrenzte Felder)
   if (userRole !== "ADMIN") {
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id as string },
-      include: { profile: true },
+    const owns = await prisma.dentistProfile.findFirst({
+      where: { id, userId: session.user.id as string },
+      select: { id: true },
     });
-    if (!user?.profile || user.profile.id !== id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    if (!owns) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const body = await req.json();

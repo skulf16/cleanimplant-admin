@@ -12,13 +12,15 @@ datasource db {
 model User {
   id           String          @id @default(cuid())
   email        String          @unique
+  username     String?         @unique
   passwordHash String
   role         Role            @default(MEMBER)
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
-  profile      DentistProfile?
+  profiles     DentistProfile[]
 
   @@index([email])
+  @@index([username])
 }
 
 enum Role {
@@ -31,21 +33,24 @@ enum Role {
 model DentistProfile {
   id        String  @id @default(cuid())
   slug      String  @unique
-  userId    String? @unique
+  citySlug  String  @default("")
+  userId    String?
   user      User?   @relation(fields: [userId], references: [id])
 
   // Basisdaten
-  title     String? // Dr., Prof. Dr. etc.
-  firstName String
-  lastName  String
-  suffix    String? // M.Sc., etc.
-  bio       String? @db.Text
-  imageUrl  String?
+  title        String? // Dr., Prof. Dr. etc.
+  firstName    String
+  lastName     String
+  suffix       String? // M.Sc., etc.
+  practiceName String? // Praxisname / Klinikname
+  bio          String? @db.Text
+  imageUrl     String?
 
   // Kontakt
-  phone   String?
-  email   String?
-  website String?
+  phone          String?
+  email          String?
+  website        String?
+  appointmentUrl String? // Terminbuchungs-Link
 
   // Adresse
   street  String?
@@ -59,7 +64,18 @@ model DentistProfile {
   lng Float?
 
   // Öffnungszeiten (JSON)
+  // Format: { "Mo": { "open": "09:00", "close": "17:00", "closed": false }, ... }
   openingHours Json?
+
+  // Google Business (für automatische Daten)
+  googleBusinessUrl String?
+
+  // Mehrsprachigkeit & Behandlungen (Arrays von Slugs)
+  languages  String[] @default(["deutsch", "englisch"])
+  treatments String[] @default([])
+
+  // Galerie (bis zu 8 Bild-URLs)
+  galleryImages String[] @default([])
 
   // Directory
   domains  Domain[]  @default([DE])
@@ -144,9 +160,12 @@ model Post {
   excerpt     String?
   content     String       @db.Text
   imageUrl    String?
-  category    PostCategory @default(WISSENSWERT)
+  category    String @default("GRUNDLAGEN")
+  domains     String[]     @default(["DE"])
   published   Boolean      @default(false)
   publishedAt DateTime?
+  metaTitle   String?
+  metaDesc    String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -154,7 +173,130 @@ model Post {
   @@index([published])
 }
 
-enum PostCategory {
-  WISSENSWERT
-  NEWS
+
+// ─── Logos & Media ───────────────────────────────────────────────────────────
+
+model MediaFile {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  fileUrl     String
+  fileName    String
+  fileType    String   // mime type z.B. image/png, application/pdf
+  fileSize    Int?     // in bytes
+  brands       String[] @default([]) // "mycleandent" | "cleanimplant"
+  category     String   @default("logos") // "logos" | "print" | "social" | "digital"
+  downloadUrl  String?  // optionaler externer Download-Link (Dropbox, WeTransfer etc.)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([brands])
+  @@index([category])
+}
+
+// ─── Experten-Netzwerk ────────────────────────────────────────────────────────
+
+enum ExpertCategory {
+  KI_IT
+  ONLINE_MARKETING
+  VIDEO_FOTO
+  COACHING_CONSULTING
+  PERSONAL_FUEHRUNG
+  PRAEVENTION
+}
+
+model Expert {
+  id          String           @id @default(cuid())
+  category    ExpertCategory   @default(KI_IT)
+  categories  ExpertCategory[] @default([])
+  firstName   String
+  lastName    String
+  bio         String?        @db.Text
+  leistungen  String?        @db.Text
+  benefits     String[]       @default([])
+  benefitLinks Json           @default("[]") // [{label: string, url: string}]
+  company      String?
+  imageUrl    String?
+
+  // Kontakt
+  address    String?
+  email      String?
+  phone      String?
+  website    String?
+  profileUrl String?  // Link zum externen Profil/Portfolio
+  linkedin   String?
+  instagram String?
+  facebook  String?
+
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+}
+
+// ─── Events & Webinare ───────────────────────────────────────────────────────
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String   @default("")
+  imageUrl    String?
+  description String   @db.Text
+  dateFrom    DateTime?
+  dateTo      DateTime?
+  city        String?
+  country     String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Webinar {
+  id               String               @id @default(cuid())
+  imageUrl         String?
+  title            String
+  shortDescription String?              @db.Text
+  duration         String?              // z.B. "60 Minuten"
+  date             DateTime?
+  tutorName        String?
+  meetingUrl       String?              // Google Meet / Zoom etc.
+  registrationUrl  String?              // externes Anmeldeformular (optional)
+  active           Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  registrations    WebinarRegistration[]
+}
+
+model WebinarRegistration {
+  id        String   @id @default(cuid())
+  webinar   Webinar  @relation(fields: [webinarId], references: [id], onDelete: Cascade)
+  webinarId String
+  userId    String
+  email     String
+  name      String
+  createdAt DateTime @default(now())
+
+  @@unique([webinarId, userId])
+  @@index([webinarId])
+}
+
+// ─── Password Reset ───────────────────────────────────────────────────────────
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([email])
+}
+
+// ─── Einstellungen ────────────────────────────────────────────────────────────
+
+model Setting {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
 }

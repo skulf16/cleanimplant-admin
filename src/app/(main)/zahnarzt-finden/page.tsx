@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import DoctorCard from "@/components/directory/DoctorCard";
+import DirectoryContent from "@/components/directory/DirectoryContent";
 import { headers } from "next/headers";
 import type { SearchParams } from "@/types";
 
@@ -18,24 +18,39 @@ async function getDoctors(params: SearchParams, domain: "DE" | "COM") {
 
   const where: Record<string, unknown> = { active: true };
 
-  // Domain-Filter
   if (domain === "DE") {
     where.domains = { hasSome: ["DE"] };
     where.country = { in: ["DE", "AT", "CH"] };
   }
 
-  // Search
   if (params.q) {
     where.OR = [
       { firstName: { contains: params.q, mode: "insensitive" } },
       { lastName: { contains: params.q, mode: "insensitive" } },
+      { practiceName: { contains: params.q, mode: "insensitive" } },
       { city: { contains: params.q, mode: "insensitive" } },
       { bio: { contains: params.q, mode: "insensitive" } },
     ];
   }
 
   if (params.city) {
-    where.city = { contains: params.city, mode: "insensitive" };
+    // Map country names → codes
+    const countryCodeMap: Record<string, string> = {
+      deutschland: "DE", germany: "DE",
+      österreich: "AT", oesterreich: "AT", austria: "AT",
+      schweiz: "CH", switzerland: "CH", suisse: "CH",
+    };
+    const countryCode = countryCodeMap[params.city.toLowerCase().trim()];
+
+    if (countryCode) {
+      where.country = countryCode;
+    } else {
+      // Search city OR region (Bundesland)
+      where.OR = [
+        { city:   { contains: params.city, mode: "insensitive" } },
+        { region: { contains: params.city, mode: "insensitive" } },
+      ];
+    }
   }
 
   if (params.country) {
@@ -83,165 +98,66 @@ export default async function DirectoryPage({
     getCategories(),
   ]);
 
-  const buildUrl = (newParams: Partial<SearchParams>) => {
-    const merged = { ...params, ...newParams };
-    const qs = Object.entries(merged)
-      .filter(([, v]) => v)
-      .map(([k, v]) => `${k}=${encodeURIComponent(v as string)}`)
-      .join("&");
-    return `/zahnarzt-finden${qs ? "?" + qs : ""}`;
-  };
-
   return (
-    <div className="max-w-[1080px] mx-auto px-4 py-8">
-      {/* Title */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#333]">Zahnarzt finden</h1>
-        <p className="text-[#666] mt-1 text-[14px]">
-          {total} Arzt{total !== 1 ? "profil" : "profil"}e gefunden
-        </p>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar Filter */}
-        <aside className="lg:w-56 flex-shrink-0">
-          <form method="get" action="/zahnarzt-finden" className="space-y-5">
-            {/* Suche */}
-            <div>
-              <label className="block text-[12px] font-semibold text-[#333] uppercase tracking-wide mb-2">
-                Suche
-              </label>
-              <input
-                type="text"
-                name="q"
-                defaultValue={params.q}
-                placeholder="Name oder Fachrichtung..."
-                className="w-full border border-gray-300 rounded px-3 py-2 text-[13px] focus:outline-none focus:border-[#2EA3F2]"
-              />
-            </div>
-
-            {/* Stadt */}
-            <div>
-              <label className="block text-[12px] font-semibold text-[#333] uppercase tracking-wide mb-2">
-                Stadt
-              </label>
-              <input
-                type="text"
-                name="city"
-                defaultValue={params.city}
-                placeholder="z.B. Berlin..."
-                className="w-full border border-gray-300 rounded px-3 py-2 text-[13px] focus:outline-none focus:border-[#2EA3F2]"
-              />
-            </div>
-
-            {/* Land */}
-            <div>
-              <label className="block text-[12px] font-semibold text-[#333] uppercase tracking-wide mb-2">
-                Land
-              </label>
-              <select
-                name="country"
-                defaultValue={params.country ?? ""}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-[13px] focus:outline-none focus:border-[#2EA3F2]"
-              >
-                <option value="">Alle Länder</option>
-                <option value="DE">Deutschland</option>
-                <option value="AT">Österreich</option>
-                <option value="CH">Schweiz</option>
-                {domain === "COM" && <option value="OTHER">Sonstige</option>}
-              </select>
-            </div>
-
-            {/* Kategorie */}
-            <div>
-              <label className="block text-[12px] font-semibold text-[#333] uppercase tracking-wide mb-2">
-                Fachrichtung
-              </label>
-              <select
-                name="category"
-                defaultValue={params.category ?? ""}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-[13px] focus:outline-none focus:border-[#2EA3F2]"
-              >
-                <option value="">Alle Fachrichtungen</option>
-                {categories.map((cat: { slug: string; name: string }) => (
-                  <option key={cat.slug} value={cat.slug}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-[#2EA3F2] text-white py-2 rounded text-[13px] font-semibold hover:bg-[#1a8fd8] transition-colors"
+    <>
+      {/* ── Hero ──────────────────────────────────────────────────────────────── */}
+      <section
+        style={{
+          height: "25vh",
+          minHeight: 180,
+          marginTop: "-72px",
+          backgroundImage: "url('https://osjaiemxynbwaxkmclcl.supabase.co/storage/v1/object/public/posts/mycleandent-bg-hero.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          display: "flex",
+          alignItems: "flex-end",
+          paddingBottom: "2rem",
+        }}
+      >
+        <div style={{ width: "98%", margin: "0 auto", paddingLeft: "1%", paddingRight: "1%" }}>
+          <h1
+            style={{
+              color: "#FEF9F5",
+              fontSize: "clamp(28px, 4vw, 48px)",
+              fontWeight: 700,
+              margin: 0,
+              lineHeight: 1.2,
+            }}
+          >
+            Finden Sie Zahnärzte in Ihrer Nähe
+          </h1>
+          {(params.city || params.q) && (
+            <p
+              style={{
+                color: "rgba(255,255,255,0.85)",
+                fontSize: 16,
+                marginTop: 6,
+                fontWeight: 500,
+              }}
             >
-              Suchen
-            </button>
-
-            {(params.q || params.city || params.country || params.category) && (
-              <a
-                href="/zahnarzt-finden"
-                className="block text-center text-[12px] text-[#666] hover:text-[#333] transition-colors"
-              >
-                Filter zurücksetzen
-              </a>
-            )}
-          </form>
-        </aside>
-
-        {/* Results */}
-        <div className="flex-1 min-w-0">
-          {doctors.length === 0 ? (
-            <div className="text-center py-16 text-[#999]">
-              <p className="text-lg mb-2">Keine Ergebnisse gefunden.</p>
-              <p className="text-[14px]">Versuchen Sie andere Suchbegriffe oder Filter.</p>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                {doctors.map((doc: Parameters<typeof DoctorCard>[0]["doctor"]) => (
-                  <DoctorCard key={doc.id} doctor={doc as Parameters<typeof DoctorCard>[0]["doctor"]} />
-                ))}
-              </div>
-
-              {/* Pagination */}
-              {pages > 1 && (
-                <div className="flex justify-center gap-2 mt-8">
-                  {page > 1 && (
-                    <a
-                      href={buildUrl({ page: String(page - 1) })}
-                      className="px-4 py-2 border border-gray-300 rounded text-[13px] hover:border-[#2EA3F2] hover:text-[#2EA3F2] transition-colors"
-                    >
-                      ← Zurück
-                    </a>
-                  )}
-                  {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
-                    <a
-                      key={p}
-                      href={buildUrl({ page: String(p) })}
-                      className={`px-4 py-2 border rounded text-[13px] transition-colors ${
-                        p === page
-                          ? "bg-[#2EA3F2] text-white border-[#2EA3F2]"
-                          : "border-gray-300 hover:border-[#2EA3F2] hover:text-[#2EA3F2]"
-                      }`}
-                    >
-                      {p}
-                    </a>
-                  ))}
-                  {page < pages && (
-                    <a
-                      href={buildUrl({ page: String(page + 1) })}
-                      className="px-4 py-2 border border-gray-300 rounded text-[13px] hover:border-[#2EA3F2] hover:text-[#2EA3F2] transition-colors"
-                    >
-                      Weiter →
-                    </a>
-                  )}
-                </div>
-              )}
-            </>
+              {total} Ergebnis{total !== 1 ? "se" : ""} gefunden
+              {params.city ? ` in ${params.city}` : ""}
+              {params.q ? ` für „${params.q}"` : ""}
+            </p>
           )}
         </div>
+      </section>
+
+      {/* ── Content ───────────────────────────────────────────────────────────── */}
+      <div style={{ background: "#FEF9F5", padding: "2.5rem 1rem 4rem" }}>
+        <div style={{ width: "100%", boxSizing: "border-box" }}>
+          <DirectoryContent
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            doctors={doctors as any}
+            categories={categories}
+            params={params}
+            domain={domain}
+            total={total}
+            page={page}
+            pages={pages}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

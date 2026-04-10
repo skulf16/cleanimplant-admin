@@ -3,7 +3,17 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      // Cloudinary
+      // Supabase Storage
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+      },
+      // WordPress / mycleandent.de (bestehende Arztfotos)
+      {
+        protocol: "https",
+        hostname: "mycleandent.de",
+      },
+      // Cloudinary (falls noch alte URLs vorhanden)
       {
         protocol: "https",
         hostname: "res.cloudinary.com",

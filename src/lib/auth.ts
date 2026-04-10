@@ -2,6 +2,8 @@ import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { authConfig } from "@/lib/auth.config";
+import { checkWordPressPassword } from "@/lib/phpass";
 
 declare module "next-auth" {
   interface Session {
@@ -10,6 +12,7 @@ declare module "next-auth" {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       name: "credentials",
@@ -20,16 +23,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+        const login = (credentials.email as string).trim();
+
+        // Support login with email OR username
+        const user = await prisma.user.findFirst({
+          where: login.includes("@")
+            ? { email: login }
+            : { OR: [{ username: login }, { email: login }] },
         });
 
         if (!user) return null;
 
-        const valid = await bcrypt.compare(
-          credentials.password as string,
-          user.passwordHash
-        );
+        const password = credentials.password as string;
+
+        // 1. bcrypt prüfen (normale Accounts)
+        let valid = await bcrypt.compare(password, user.passwordHash);
+
+        // 2. Falls nicht: WordPress phpass prüfen (migrierte Accounts)
+        if (!valid && user.passwordHash.startsWith("$P$")) {
+          valid = checkWordPressPassword(password, user.passwordHash);
+
+          // Bei Erfolg: automatisch auf bcrypt upgraden
+          if (valid) {
+            const newHash = await bcrypt.hash(password, 12);
+            await prisma.user.update({
+              where: { id: user.id },
+              data:  { passwordHash: newHash },
+            });
+          }
+        }
 
         if (!valid) return null;
 
@@ -37,23 +59,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = (user as { id: string; role: string }).role;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      session.user.id = token.id as string;
-      session.user.role = token.role as string;
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/login",
-    error: "/login",
-  },
-  session: { strategy: "jwt" },
 });

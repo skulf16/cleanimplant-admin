@@ -25,10 +25,10 @@ export default async function AdminDashboard() {
   const [stats, recent] = await Promise.all([getStats(), getRecentDoctors()]);
 
   const cards = [
-    { label: "Arztprofile gesamt", value: stats.total, icon: MapPin, href: "/admin/doctors", color: "text-[#2EA3F2]", bg: "bg-[#e8f5fe]" },
+    { label: "Arztprofile gesamt", value: stats.total, icon: MapPin, href: "/admin/doctors", color: "text-[#30A2F1]", bg: "bg-[#e8f5fe]" },
     { label: "Verifiziert", value: stats.verified, icon: ShieldCheck, href: "/admin/doctors?verified=true", color: "text-green-600", bg: "bg-green-50" },
     { label: "Aktiv", value: stats.active, icon: MapPin, href: "/admin/doctors?active=true", color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "Benutzer", value: stats.users, icon: Users, href: "/admin/users", color: "text-[#F5907C]", bg: "bg-[#fdf0ee]" },
+    { label: "Benutzer", value: stats.users, icon: Users, href: "/admin/users", color: "text-[#30A2F1]", bg: "bg-[#EFF6FF]" },
   ];
 
   return (
@@ -56,7 +56,7 @@ export default async function AdminDashboard() {
       <div className="bg-white rounded-lg border border-gray-200">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h2 className="font-semibold text-[#333]">Zuletzt hinzugefügt</h2>
-          <Link href="/admin/doctors" className="text-[13px] text-[#2EA3F2] hover:underline">
+          <Link href="/admin/doctors" className="text-[13px] text-[#30A2F1] hover:underline">
             Alle anzeigen
           </Link>
         </div>
@@ -84,7 +84,7 @@ export default async function AdminDashboard() {
                 )}
                 <Link
                   href={`/admin/doctors/${doc.id}`}
-                  className="text-[12px] text-[#2EA3F2] hover:underline"
+                  className="text-[12px] text-[#30A2F1] hover:underline"
                 >
                   Bearbeiten
                 </Link>

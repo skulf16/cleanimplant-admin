@@ -42,6 +42,9 @@
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.5.0"
   },
+  "overrides": {
+    "nodemailer": "^6.10.1"
+  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

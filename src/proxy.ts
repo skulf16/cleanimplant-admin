@@ -48,6 +48,7 @@ export default auth(function middleware(req: NextRequest) {
 
   const isDotDe =
     host.includes("mycleandent.de") ||
+    host.includes("mycleandent.com") ||
     host.includes("localhost:3000") ||
     host.includes("127.0.0.1:3000");
 

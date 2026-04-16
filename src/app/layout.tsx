@@ -42,16 +42,14 @@ export default async function RootLayout({
 
   return (
     <html lang="de" className={`${montserrat.variable} h-full`}>
-      <head>
+      <body className="min-h-full flex flex-col antialiased" suppressHydrationWarning>
         <Script
           id="Cookiebot"
           src="https://consent.cookiebot.com/uc.js"
           data-cbid="7cd84ce3-6171-4fbc-b1e3-8ae12d61657b"
           data-blockingmode="auto"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
         />
-      </head>
-      <body className="min-h-full flex flex-col antialiased" suppressHydrationWarning>
         <SessionProvider session={session}>
           {children}
         </SessionProvider>

@@ -25,6 +25,7 @@ const MEMBER_HOSTS = [
 const ADMIN_HOSTS = [
   "admin.mycleandent.de",
   "cleanimplant-admin.vercel.app",
+  "cleanimplant-admin-git-main-info-59699660s-projects.vercel.app",
   "localhost:3002",
   "127.0.0.1:3002",
 ];

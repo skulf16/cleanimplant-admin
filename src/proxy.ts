@@ -18,6 +18,8 @@ import type { NextRequest } from "next/server";
 const MEMBER_HOSTS = [
   "member.cleanimplant.com",
   "members.cleanimplant.com",
+  "cleanimplant-members.vercel.app",
+  "cleanimplant-members-",  // Preview-URLs: cleanimplant-members-<hash>-...-projects.vercel.app
   "localhost:3001",
   "127.0.0.1:3001",
 ];

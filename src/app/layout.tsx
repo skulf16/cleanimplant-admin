@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import { auth } from "@/lib/auth";
 import SessionProvider from "@/components/layout/SessionProvider";
+import Script from "next/script";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -41,6 +42,15 @@ export default async function RootLayout({
 
   return (
     <html lang="de" className={`${montserrat.variable} h-full`}>
+      <head>
+        <Script
+          id="Cookiebot"
+          src="https://consent.cookiebot.com/uc.js"
+          data-cbid="7cd84ce3-6171-4fbc-b1e3-8ae12d61657b"
+          data-blockingmode="auto"
+          strategy="beforeInteractive"
+        />
+      </head>
       <body className="min-h-full flex flex-col antialiased" suppressHydrationWarning>
         <SessionProvider session={session}>
           {children}

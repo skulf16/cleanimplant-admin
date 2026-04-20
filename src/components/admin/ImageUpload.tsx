@@ -10,7 +10,11 @@ const COMPRESSION_OPTIONS = {
   maxWidthOrHeight: 2000,
   useWebWorker: true,
   initialQuality: 0.85,
+  alwaysKeepResolution: false,
 };
+
+// Harte Obergrenze für den Upload (Vercel-Body-Limit liegt bei ~4.5 MB)
+const MAX_UPLOAD_BYTES = 4.5 * 1024 * 1024;
 
 type Props = {
   value: string;
@@ -52,6 +56,14 @@ export default function ImageUpload({
         } finally {
           setCompressing(false);
         }
+      }
+
+      // Wenn auch nach Kompression zu groß: Abbruch mit klarer Meldung
+      if (toUpload.size > MAX_UPLOAD_BYTES) {
+        setError(
+          `Bild zu groß (${(toUpload.size / 1024 / 1024).toFixed(1)} MB nach Kompression). Bitte kleineres Bild wählen.`
+        );
+        return;
       }
 
       setUploading(true);

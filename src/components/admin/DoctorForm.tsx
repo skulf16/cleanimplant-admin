@@ -269,8 +269,14 @@ export default function DoctorForm({ doctor, categories }: Props) {
     (doctor?.galleryImages as string[] | undefined) ?? Array(6).fill("")
   );
 
-  const setGalleryImage = (i: number, url: string) =>
-    setGalleryImages((prev) => prev.map((v, idx) => (idx === i ? url : v)));
+  const setGalleryImage = (i: number, url: string) => {
+    console.log("[DoctorForm] setGalleryImage", i, url);
+    setGalleryImages((prev) => {
+      const next = prev.map((v, idx) => (idx === i ? url : v));
+      console.log("[DoctorForm] gallery state:", next);
+      return next;
+    });
+  };
 
   return (
     <form action={formAction} className="space-y-8 max-w-3xl">

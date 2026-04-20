@@ -58,28 +58,47 @@ export default function ImageUpload({
         }
       }
 
-      // Wenn auch nach Kompression zu groß: Abbruch mit klarer Meldung
-      if (toUpload.size > MAX_UPLOAD_BYTES) {
-        setError(
-          `Bild zu groß (${(toUpload.size / 1024 / 1024).toFixed(1)} MB nach Kompression). Bitte kleineres Bild wählen.`
-        );
+      // Globales 50 MB Hard-Limit (auch Supabase erlaubt nicht viel mehr)
+      if (toUpload.size > 50 * 1024 * 1024) {
+        setError(`Bild zu groß (${(toUpload.size / 1024 / 1024).toFixed(1)} MB). Max 50 MB.`);
         return;
       }
 
       setUploading(true);
       try {
-        const fd = new FormData();
-        fd.append("file", toUpload);
-        fd.append("folder", folder);
-        const res = await fetch("/api/upload", { method: "POST", body: fd });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          console.error("[ImageUpload] Upload failed:", res.status, data);
-          throw new Error(data.error ?? `Upload fehlgeschlagen (${res.status})`);
+        // ── Schritt 1: Signed Upload URL vom Server holen ─────────────────
+        const signRes = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mode: "signed",
+            fileName: toUpload.name || "upload.bin",
+            folder,
+            contentType: toUpload.type,
+          }),
+        });
+        const signData = await signRes.json().catch(() => ({}));
+        if (!signRes.ok) {
+          console.error("[ImageUpload] Sign failed:", signRes.status, signData);
+          throw new Error(signData.error ?? `Authorisierung fehlgeschlagen (${signRes.status})`);
         }
-        const { url } = data;
-        if (!url) throw new Error("Keine URL in der Antwort");
-        onChange(url);
+
+        const { signedUrl, publicUrl } = signData as { signedUrl: string; publicUrl: string };
+        if (!signedUrl || !publicUrl) throw new Error("Ungültige Antwort vom Server");
+
+        // ── Schritt 2: Datei direkt an Supabase ──────────────────────────
+        const putRes = await fetch(signedUrl, {
+          method: "PUT",
+          headers: { "Content-Type": toUpload.type || "application/octet-stream" },
+          body: toUpload,
+        });
+        if (!putRes.ok) {
+          const text = await putRes.text().catch(() => "");
+          console.error("[ImageUpload] Supabase PUT failed:", putRes.status, text);
+          throw new Error(`Upload an Supabase fehlgeschlagen (${putRes.status})`);
+        }
+
+        onChange(publicUrl);
       } catch (e: unknown) {
         setError((e as Error).message);
         console.error("[ImageUpload] Error:", e);

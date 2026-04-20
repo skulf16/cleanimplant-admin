@@ -2,6 +2,15 @@
 
 import { useState, useRef, useCallback } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
+import imageCompression from "browser-image-compression";
+
+// Max 2000px lange Kante, Ziel ~400 KB, Original-Format beibehalten
+const COMPRESSION_OPTIONS = {
+  maxSizeMB: 0.4,
+  maxWidthOrHeight: 2000,
+  useWebWorker: true,
+  initialQuality: 0.85,
+};
 
 type Props = {
   value: string;
@@ -20,6 +29,7 @@ export default function ImageUpload({
 }: Props) {
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [compressing, setCompressing] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -30,10 +40,24 @@ export default function ImageUpload({
         return;
       }
       setError("");
+
+      // ── Komprimieren (SVG und GIF bleiben unangetastet) ────────────────
+      let toUpload: File = file;
+      if (!/svg|gif/.test(file.type) && file.size > 400 * 1024) {
+        setCompressing(true);
+        try {
+          toUpload = await imageCompression(file, COMPRESSION_OPTIONS);
+        } catch (e) {
+          console.warn("[ImageUpload] Compression failed, using original:", e);
+        } finally {
+          setCompressing(false);
+        }
+      }
+
       setUploading(true);
       try {
         const fd = new FormData();
-        fd.append("file", file);
+        fd.append("file", toUpload);
         fd.append("folder", folder);
         const res = await fetch("/api/upload", { method: "POST", body: fd });
         const data = await res.json().catch(() => ({}));
@@ -84,9 +108,10 @@ export default function ImageUpload({
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={value} alt="" style={{ objectFit: "cover", width: "100%", height: "100%" }} />
-            {uploading && (
-              <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+            {(uploading || compressing) && (
+              <div className="absolute inset-0 bg-white/70 flex flex-col items-center justify-center gap-1">
                 <Loader2 size={20} className="animate-spin text-[#30A2F1]" />
+                {compressing && <span className="text-[9px] text-[#30A2F1] font-medium">Optimiere…</span>}
               </div>
             )}
           </div>
@@ -117,8 +142,11 @@ export default function ImageUpload({
             ${aspectRatio === "square" ? "w-24 h-24" : "w-40 h-28"}
             ${dragging ? "border-[#30A2F1] bg-[#EFF6FF]" : "border-gray-300 bg-gray-50 hover:border-[#30A2F1] hover:bg-[#EFF6FF]"}`}
         >
-          {uploading ? (
-            <Loader2 size={20} className="animate-spin text-[#30A2F1]" />
+          {(uploading || compressing) ? (
+            <>
+              <Loader2 size={20} className="animate-spin text-[#30A2F1]" />
+              {compressing && <span className="text-[9px] text-[#30A2F1] font-medium">Optimiere…</span>}
+            </>
           ) : (
             <>
               <Upload size={18} className="text-gray-400" />

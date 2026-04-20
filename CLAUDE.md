@@ -9,16 +9,36 @@ Ein einziges Next.js-Projekt (16.2.1) mit drei Bereichen, die über die Middlewa
 
 | Bereich | Domain (Produktion) | Lokal |
 |---------|--------------------|----|
-| Öffentliche Seite | `mycleandent.de` | `localhost:3000` |
+| Öffentliche Seite | `www.mycleandent.de` | `localhost:3000` |
 | Member-Bereich | `member.cleanimplant.com` | `localhost:3001` (Proxy: `npm run proxy`) |
 | Admin-Panel | `admin.mycleandent.de` | `localhost:3002` (Proxy: `npm run proxy:admin`) |
 
 ## Vercel Deployments
 
-Alle drei Bereiche laufen im selben Vercel-Projekt `cleanimplant-admin` aus dem GitHub-Repo `skulf16/cleanimplant-admin`.
+**Wichtig:** Ein einziges GitHub-Repo (`skulf16/cleanimplant-admin`), aber **drei separate Vercel-Projekte** — eines pro Domain. Alle bauen denselben Code, haben aber **jeweils eigene Environment Variables**.
 
-- Jeder Push auf `main` → geht sofort live
-- Feature-Branch pushen → Vercel erstellt Preview-URL zum Testen
+| Vercel-Projekt | Domain | Zweck |
+|---|---|---|
+| `mycleandent.de` | `www.mycleandent.de` | Öffentliche Seite |
+| `cleanimplant-admin` | `admin.mycleandent.de` | Admin-Panel |
+| `cleanimplant-members` | `member.cleanimplant.com` | Member-Bereich |
+
+- Jeder Push auf `main` → alle drei Projekte deployen parallel
+- Feature-Branch pushen → Vercel erstellt Preview-URLs in allen drei Projekten
+
+### Environment Variables – pro Projekt setzen!
+
+Env-Vars sind **nicht shared** zwischen den Vercel-Projekten. Wer eine Variable anlegt/ändert, muss das in **jedem relevanten Projekt einzeln** tun. Besonders wichtig:
+
+| Variable | Wo gebraucht | Muss gesetzt sein in |
+|---|---|---|
+| `NEXT_PUBLIC_BASE_URL` | Sitemap, OG-Tags, Canonicals | `mycleandent.de` (Wert: `https://www.mycleandent.de`) |
+| `NEXT_PUBLIC_GOOGLE_MAPS_KEY` | Directory-Map auf der öff. Seite | `mycleandent.de` |
+| `DATABASE_URL` | Prisma | alle drei |
+| `NEXTAUTH_SECRET` | Auth | alle drei |
+| SMTP-Zugänge | Mails | mindestens `cleanimplant-admin` + `cleanimplant-members` |
+
+**Regel:** Nach jeder Env-Var-Änderung muss das Projekt **ohne Build-Cache** redeployed werden — sonst greift der neue Wert nicht (bei `NEXT_PUBLIC_*` zwingend, da diese build-time eingebacken werden).
 
 ## Lokale Entwicklung
 

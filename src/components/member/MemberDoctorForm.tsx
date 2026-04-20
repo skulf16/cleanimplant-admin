@@ -454,26 +454,10 @@ export default function MemberDoctorForm({ doctor }: Props) {
         <p className="text-[11px] text-[#999] mt-2">NM = Nachmittag (leer lassen wenn keine Mittagspause)</p>
       </fieldset>
 
-      {/* ── Galerie ────────────────────────────────────────────────── */}
-      <fieldset className="bg-white border border-[#e5e7eb] rounded-[6px] p-6">
-        <legend className="text-[13px] font-semibold text-[#555] tracking-wide px-2 mb-4">
-          Galerie (bis zu 6 Bilder)
-        </legend>
-        <div className="flex flex-wrap gap-4">
-          {Array.from({ length: 6 }, (_, i) => (
-            <div key={i}>
-              <ImageUpload
-                label={`Bild ${i + 1}`}
-                value={galleryImages[i] ?? ""}
-                onChange={(url) => setGalleryImage(i, url)}
-                aspectRatio="free"
-                folder="practice-images"
-              />
-              <input type="hidden" name={`galleryImages[${i}]`} value={galleryImages[i] ?? ""} />
-            </div>
-          ))}
-        </div>
-      </fieldset>
+      {/* ── Galerie (vorerst ausgeblendet, versteckte Felder erhalten) ─ */}
+      {galleryImages.map((url, i) => (
+        <input key={i} type="hidden" name={`galleryImages[${i}]`} value={url ?? ""} />
+      ))}
 
       {/* ── Sprachen ───────────────────────────────────────────────── */}
       <fieldset className="bg-white border border-[#e5e7eb] rounded-[6px] p-6">

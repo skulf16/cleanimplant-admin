@@ -62,8 +62,8 @@ export default function DoctorMap({ doctors, hoveredId }: Props) {
     if (!(window as Window & { __gmapsInitialized?: boolean }).__gmapsInitialized) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (setOptions as any)({
-        apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!,
-        version: "weekly",
+        key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!,
+        v: "weekly",
       });
       (window as Window & { __gmapsInitialized?: boolean }).__gmapsInitialized = true;
     }

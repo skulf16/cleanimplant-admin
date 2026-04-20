@@ -266,7 +266,7 @@ export default function DoctorForm({ doctor, categories }: Props) {
     (doctor?.imageUrl as string | null | undefined) ?? ""
   );
   const [galleryImages, setGalleryImages] = useState<string[]>(
-    (doctor?.galleryImages as string[] | undefined) ?? Array(8).fill("")
+    (doctor?.galleryImages as string[] | undefined) ?? Array(6).fill("")
   );
 
   const setGalleryImage = (i: number, url: string) =>
@@ -492,10 +492,10 @@ export default function DoctorForm({ doctor, categories }: Props) {
       {/* ── Galerie ────────────────────────────────────────────────── */}
       <fieldset className="bg-white border border-[#e5e7eb] rounded-[6px] p-6">
         <legend className="text-[13px] font-semibold text-[#555] tracking-wide px-2 mb-4">
-          Galerie (bis zu 8 Bilder)
+          Galerie (bis zu 6 Bilder)
         </legend>
         <div className="flex flex-wrap gap-4">
-          {Array.from({ length: 8 }, (_, i) => (
+          {Array.from({ length: 6 }, (_, i) => (
             <div key={i}>
               <ImageUpload
                 label={`Bild ${i + 1}`}

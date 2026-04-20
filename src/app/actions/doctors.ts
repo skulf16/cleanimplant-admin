@@ -33,7 +33,7 @@ function extractNewFields(formData: FormData) {
   const languages = formData.getAll("languages") as string[];
   const treatments = formData.getAll("treatments") as string[];
 
-  const galleryImages = Array.from({ length: 8 }, (_, i) =>
+  const galleryImages = Array.from({ length: 6 }, (_, i) =>
     formData.get(`galleryImages[${i}]`) as string | null
   ).filter(Boolean) as string[];
 

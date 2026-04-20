@@ -5,6 +5,7 @@ import { updateMemberDoctor } from "@/app/actions/doctors";
 import type { DentistProfile } from "@/generated/prisma/client";
 import ImageUpload from "@/components/admin/ImageUpload";
 import BioEditor from "@/components/admin/BioEditor";
+import AddressAutocomplete from "@/components/member/AddressAutocomplete";
 
 // ── Static data ───────────────────────────────────────────────────────────────
 
@@ -369,45 +370,17 @@ export default function MemberDoctorForm({ doctor }: Props) {
         <legend className="text-[13px] font-semibold text-[#555] tracking-wide px-2 mb-4">
           Adresse
         </legend>
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
-          <div>
-            <label className="label">Straße</label>
-            <input name="street" defaultValue={val("street")} className="input" />
-          </div>
-          <div>
-            <label className="label">PLZ</label>
-            <input name="zip" defaultValue={val("zip")} className="input" />
-          </div>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginTop: 16 }}>
-          <div>
-            <label className="label">Stadt *</label>
-            <input name="city" defaultValue={val("city")} required className="input" />
-          </div>
-          <div>
-            <label className="label">Bundesland / Kanton</label>
-            <input name="region" defaultValue={val("region")} className="input" />
-          </div>
-          <div>
-            <label className="label">Land *</label>
-            <select name="country" defaultValue={val("country") || "DE"} className="input">
-              <option value="DE">Deutschland</option>
-              <option value="AT">Österreich</option>
-              <option value="CH">Schweiz</option>
-              <option value="OTHER">Sonstiges</option>
-            </select>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <div>
-            <label className="label">Breitengrad (lat)</label>
-            <input name="lat" defaultValue={val("lat")} placeholder="52.520008" className="input" />
-          </div>
-          <div>
-            <label className="label">Längengrad (lng)</label>
-            <input name="lng" defaultValue={val("lng")} placeholder="13.404954" className="input" />
-          </div>
-        </div>
+        <AddressAutocomplete
+          initial={{
+            street:  doctor?.street,
+            zip:     doctor?.zip,
+            city:    doctor?.city,
+            region:  doctor?.region,
+            country: doctor?.country,
+            lat:     doctor?.lat,
+            lng:     doctor?.lng,
+          }}
+        />
       </fieldset>
 
       {/* ── Öffnungszeiten ─────────────────────────────────────────── */}

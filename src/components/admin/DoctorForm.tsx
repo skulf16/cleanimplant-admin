@@ -265,18 +265,20 @@ export default function DoctorForm({ doctor, categories }: Props) {
   const [imageUrl, setImageUrl] = useState<string>(
     (doctor?.imageUrl as string | null | undefined) ?? ""
   );
-  const [galleryImages, setGalleryImages] = useState<string[]>(
-    (doctor?.galleryImages as string[] | undefined) ?? Array(6).fill("")
-  );
+  const [galleryImages, setGalleryImages] = useState<string[]>(() => {
+    const base = (doctor?.galleryImages as string[] | undefined) ?? [];
+    const padded = [...base];
+    while (padded.length < 6) padded.push("");
+    return padded.slice(0, 6);
+  });
 
-  const setGalleryImage = (i: number, url: string) => {
-    console.log("[DoctorForm] setGalleryImage", i, url);
+  const setGalleryImage = (i: number, url: string) =>
     setGalleryImages((prev) => {
-      const next = prev.map((v, idx) => (idx === i ? url : v));
-      console.log("[DoctorForm] gallery state:", next);
+      const next = [...prev];
+      while (next.length <= i) next.push("");
+      next[i] = url;
       return next;
     });
-  };
 
   return (
     <form action={formAction} className="space-y-8 max-w-3xl">

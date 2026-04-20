@@ -1,8 +1,9 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { ExternalLink, CheckCircle, MapPin, Building2 } from "lucide-react";
+import { ExternalLink, CheckCircle, MapPin, Building2, Pencil } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default async function ProfilPage() {
   const session = await auth();
@@ -118,6 +119,14 @@ export default async function ProfilPage() {
                 </div>
 
                 <div className="flex items-center gap-3 flex-wrap">
+                  <Link
+                    href={`/account/profil/${profile.id}`}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-colors"
+                    style={{ background: "#F4907B", color: "#fff" }}
+                  >
+                    <Pencil size={14} />
+                    Bearbeiten
+                  </Link>
                   <a
                     href={`/zahnarzt/${profile.citySlug}/${profile.slug}?preview=1`}
                     target="_blank"

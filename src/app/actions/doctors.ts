@@ -178,6 +178,71 @@ export async function updateDoctor(id: string, formData: FormData) {
   revalidatePath("/admin/doctors/" + id);
 }
 
+// ── Member: update own profile ───────────────────────────────────────────────
+
+async function requireProfileOwnership(id: string) {
+  const session = await auth();
+  if (!session) throw new Error("Unauthorized");
+  const userId = session.user.id as string;
+  const role = (session.user as { role?: string }).role;
+  if (role === "ADMIN") return; // admins bypass
+  const owns = await prisma.dentistProfile.findFirst({
+    where: { id, userId },
+    select: { id: true },
+  });
+  if (!owns) throw new Error("Forbidden");
+}
+
+export async function updateMemberDoctor(id: string, formData: FormData) {
+  await requireProfileOwnership(id);
+
+  const { languages, treatments, galleryImages, openingHours, appointmentUrl, googleBusinessUrl } =
+    extractNewFields(formData);
+
+  // Important: DO NOT update verified, featured, active, domains, slug, citySlug, metaTitle, metaDesc
+  // Members cannot change these.
+  await prisma.dentistProfile.update({
+    where: { id },
+    data: {
+      title:            formData.get("title") as string || null,
+      firstName:        formData.get("firstName") as string,
+      lastName:         formData.get("lastName") as string,
+      suffix:           formData.get("suffix") as string || null,
+      practiceName:     formData.get("practiceName") as string || null,
+      bio:              formData.get("bio") as string || null,
+      imageUrl:         formData.get("imageUrl") as string || null,
+      phone:            formData.get("phone") as string || null,
+      email:            formData.get("email") as string || null,
+      website:          formData.get("website") as string || null,
+      appointmentUrl,
+      googleBusinessUrl,
+      street:           formData.get("street") as string || null,
+      zip:              formData.get("zip") as string || null,
+      city:             formData.get("city") as string,
+      region:           formData.get("region") as string || null,
+      country:          (formData.get("country") as "DE"|"AT"|"CH"|"OTHER") || "DE",
+      lat:              formData.get("lat") ? parseFloat(formData.get("lat") as string) : null,
+      lng:              formData.get("lng") ? parseFloat(formData.get("lng") as string) : null,
+      languages,
+      treatments,
+      galleryImages,
+      openingHours,
+    },
+  });
+
+  const updated = await prisma.dentistProfile.findUnique({
+    where: { id },
+    select: { slug: true, citySlug: true, country: true, region: true },
+  });
+  revalidatePath("/account/profil");
+  revalidatePath(`/account/profil/${id}`);
+  if (updated) {
+    revalidatePath(`/zahnarzt/${updated.citySlug}/${updated.slug}`);
+    revalidateArchivePages(updated.country, updated.region, updated.citySlug);
+  }
+  revalidatePath("/");
+}
+
 // ── Set doctor credentials ────────────────────────────────────────────────────
 
 export async function setDoctorCredentials(doctorId: string, formData: FormData) {

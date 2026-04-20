@@ -66,8 +66,6 @@ export default function ImageUpload({
 
       setUploading(true);
       try {
-        console.log("[ImageUpload] 1. Requesting signed URL for", folder, toUpload.name, toUpload.type, toUpload.size);
-
         // ── Schritt 1: Signed Upload URL vom Server holen ─────────────────
         const signRes = await fetch("/api/upload", {
           method: "POST",
@@ -79,10 +77,7 @@ export default function ImageUpload({
             contentType: toUpload.type,
           }),
         });
-        console.log("[ImageUpload] 2. Sign response status:", signRes.status);
-
         const signData = await signRes.json().catch(() => ({}));
-        console.log("[ImageUpload] 3. Sign response body:", signData);
 
         if (!signRes.ok) {
           console.error("[ImageUpload] Sign failed:", signRes.status, signData);
@@ -91,11 +86,8 @@ export default function ImageUpload({
 
         const { signedUrl, publicUrl } = signData as { signedUrl: string; publicUrl: string };
         if (!signedUrl || !publicUrl) {
-          console.error("[ImageUpload] Missing signedUrl or publicUrl", { signedUrl, publicUrl });
           throw new Error("Ungültige Antwort vom Server");
         }
-
-        console.log("[ImageUpload] 4. PUT to Supabase…");
 
         // ── Schritt 2: Datei direkt an Supabase ──────────────────────────
         const putRes = await fetch(signedUrl, {
@@ -103,7 +95,6 @@ export default function ImageUpload({
           headers: { "Content-Type": toUpload.type || "application/octet-stream" },
           body: toUpload,
         });
-        console.log("[ImageUpload] 5. PUT response status:", putRes.status);
 
         if (!putRes.ok) {
           const text = await putRes.text().catch(() => "");
@@ -111,7 +102,6 @@ export default function ImageUpload({
           throw new Error(`Upload an Supabase fehlgeschlagen (${putRes.status})`);
         }
 
-        console.log("[ImageUpload] 6. Success, calling onChange with", publicUrl);
         onChange(publicUrl);
       } catch (e: unknown) {
         setError((e as Error).message);

@@ -7,20 +7,43 @@ export const metadata: Metadata = {
   description: "Artikel, Interviews und Neuigkeiten rund um Zahnimplantate und die CleanImplant-Zertifizierung.",
 };
 
+// Diese drei Beiträge werden immer oben angezeigt (in dieser Reihenfolge).
+const PINNED_SLUGS = [
+  "wie-funktioniert-ein-implantat",
+  "vorteile-implantatversorgung",
+  "zahnimplantate-unterschiede",
+];
+
 async function getPosts() {
-  return prisma.post.findMany({
-    where: { published: true },
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      excerpt: true,
-      imageUrl: true,
-      category: true,
-      publishedAt: true,
-    },
-    orderBy: { publishedAt: "desc" },
-  });
+  const select = {
+    id: true,
+    slug: true,
+    title: true,
+    excerpt: true,
+    imageUrl: true,
+    category: true,
+    publishedAt: true,
+  };
+
+  const [pinned, rest] = await Promise.all([
+    prisma.post.findMany({
+      where: { published: true, slug: { in: PINNED_SLUGS } },
+      select,
+    }),
+    prisma.post.findMany({
+      where: { published: true, slug: { notIn: PINNED_SLUGS } },
+      select,
+      orderBy: { publishedAt: "desc" },
+    }),
+  ]);
+
+  // Pinned-Beiträge in der Reihenfolge von PINNED_SLUGS sortieren
+  const pinnedBySlug = new Map(pinned.map((p) => [p.slug, p]));
+  const pinnedOrdered = PINNED_SLUGS
+    .map((slug) => pinnedBySlug.get(slug))
+    .filter((p): p is NonNullable<typeof p> => p !== undefined);
+
+  return [...pinnedOrdered, ...rest];
 }
 
 export default async function WissenswertPage() {

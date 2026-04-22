@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+
+// Alle Auth-Seiten (/login, /forgot, /register, /reset) sollen nicht indexiert
+// werden – weder auf www.mycleandent.de, noch auf admin.* oder member.*.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false, nocache: true },
+};
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -11,6 +11,17 @@ import {
 
 export const dynamic = "force-dynamic";
 
+// ── Public-URL-Basen (Admin liegt auf eigener Domain) ───────────────────────
+const PUBLIC_BASE =
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  (process.env.NODE_ENV === "production"
+    ? "https://www.mycleandent.de"
+    : "http://localhost:3000");
+const MEMBER_BASE =
+  process.env.NODE_ENV === "production"
+    ? "https://member.cleanimplant.com"
+    : "http://localhost:3001";
+
 // ── Statische Routen (aus src/app/(main)/ – manuell gepflegt) ───────────────
 const STATIC_PAGES_MYCLEANDENT = [
   { path: "/",                 label: "Startseite",         note: "" },
@@ -123,7 +134,8 @@ export default async function SeitenUebersicht() {
               path: p.path,
               note: p.note,
               status: "live" as const,
-              href: p.path,
+              href: `${PUBLIC_BASE}${p.path}`,
+              external: true,
             }))}
           />
         </Subsection>
@@ -182,7 +194,7 @@ export default async function SeitenUebersicht() {
                 path: `/zahnarzt/${COUNTRY_SLUG[c.country]}`,
                 note: `${c._count._all} Zahnärzte`,
                 status: "live" as const,
-                href: `/zahnarzt/${COUNTRY_SLUG[c.country]}`,
+                href: `${PUBLIC_BASE}/zahnarzt/${COUNTRY_SLUG[c.country]}`,
                 external: true,
               }))}
           />
@@ -201,7 +213,7 @@ export default async function SeitenUebersicht() {
                   path: `/zahnarzt/${slug}`,
                   note: `${r._count._all} Zahnärzte`,
                   status: "live" as const,
-                  href: `/zahnarzt/${slug}`,
+                  href: `${PUBLIC_BASE}/zahnarzt/${slug}`,
                   external: true,
                 };
               })}
@@ -224,7 +236,7 @@ export default async function SeitenUebersicht() {
                 path: `/zahnarzt/${c.citySlug}`,
                 note: `${c._count._all} Zahnärzte · ${COUNTRY_LABEL[c.country] ?? c.country}`,
                 status: "live" as const,
-                href: `/zahnarzt/${c.citySlug}`,
+                href: `${PUBLIC_BASE}/zahnarzt/${c.citySlug}`,
                 external: true,
               }))}
             />
@@ -245,6 +257,8 @@ export default async function SeitenUebersicht() {
               path: p.path,
               note: p.note,
               status: "live" as const,
+              href: `${MEMBER_BASE}${p.path}`,
+              external: true,
             }))}
           />
         </Subsection>

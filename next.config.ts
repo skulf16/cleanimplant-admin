@@ -42,6 +42,11 @@ const nextConfig: NextConfig = {
       { source: "/location/germany/baden-wurttemberg",             destination: "/zahnarzt/baden-wuerttemberg", permanent: true },
       { source: "/location/switzerland/sankt-gallen/wil",          destination: "/zahnarzt/schweiz",            permanent: true },
       { source: "/places/germany/baden-wurttemberg/tubingen",      destination: "/zahnarzt/baden-wuerttemberg", permanent: true },
+
+      // ── Englische Regions-Slugs → deutsche Entsprechung ───────────────────
+      // (DB enthält historisch noch englische Region-Namen; bis die angepasst
+      // sind, leiten wir die alten URLs auf die neuen um.)
+      { source: "/zahnarzt/upper-austria", destination: "/zahnarzt/oberoesterreich", permanent: true },
     ];
   },
 };

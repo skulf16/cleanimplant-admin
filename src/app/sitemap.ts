@@ -1,15 +1,8 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { slugifyRegion } from "@/lib/region";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://mycleandent.de";
-
-function slugifyRegion(region: string): string {
-  return region
-    .toLowerCase()
-    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 const COUNTRY_SLUGS: Record<string, string> = { DE: "deutschland", AT: "oesterreich", CH: "schweiz" };
 

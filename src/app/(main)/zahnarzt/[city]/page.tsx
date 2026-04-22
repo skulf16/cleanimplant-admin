@@ -2,22 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { slugifyRegion, normalizeRegionName } from "@/lib/region";
 import DoctorCard from "@/components/directory/DoctorCard";
 import type { DentistWithRelations } from "@/types";
 
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ city: string }> };
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function slugifyRegion(region: string): string {
-  return region
-    .toLowerCase()
-    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 const COUNTRY_MAP: Record<string, { code: string; name: string }> = {
   deutschland: { code: "DE", name: "Deutschland" },
@@ -37,7 +28,9 @@ const COUNTRY_NAME_MAP: Record<string, string> = {
 
 type PageType =
   | { type: "country"; code: string; name: string }
-  | { type: "region";  regionName: string }
+  // `regionDb` ist der rohe Wert aus der DB (für Filter-Queries).
+  // `regionName` ist der Anzeigename (für Title/Breadcrumb/H1).
+  | { type: "region";  regionDb: string; regionName: string }
   | { type: "city";    citySlug: string };
 
 async function detectPageType(slug: string): Promise<PageType | null> {
@@ -54,7 +47,7 @@ async function detectPageType(slug: string): Promise<PageType | null> {
   const match = allRegions.find(
     (r): r is { region: string } => r.region !== null && slugifyRegion(r.region) === slug
   );
-  if (match) return { type: "region", regionName: match.region };
+  if (match) return { type: "region", regionDb: match.region, regionName: normalizeRegionName(match.region) };
 
   // 3. City?
   const cityDoc = await prisma.dentistProfile.findFirst({
@@ -108,7 +101,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (pageType.type === "region") {
     const count = await prisma.dentistProfile.count({
-      where: { active: true, region: pageType.regionName },
+      where: { active: true, region: pageType.regionDb },
     });
     return {
       title: `Zahnarzt ${pageType.regionName} – ${count} geprüfte Zahnärzte`,
@@ -185,7 +178,7 @@ export default async function ArchivePage({ params }: Props) {
             <PillSection
               title={pageType.code === "CH" ? "Zahnärzte nach Kanton" : "Zahnärzte nach Bundesland"}
               pills={regions.filter(r => r.region).map(r => ({
-                label: r.region!,
+                label: normalizeRegionName(r.region!),
                 href: `/zahnarzt/${slugifyRegion(r.region!)}`,
               }))}
             />
@@ -204,7 +197,7 @@ export default async function ArchivePage({ params }: Props) {
   // ── REGION ───────────────────────────────────────────────────────────────
   if (pageType.type === "region") {
     const doctors = await prisma.dentistProfile.findMany({
-      where: { active: true, region: pageType.regionName },
+      where: { active: true, region: pageType.regionDb },
       include: { categories: { include: { category: true } }, socialLinks: true },
       orderBy: [{ featured: "desc" }, { lastName: "asc" }],
     });
@@ -251,7 +244,7 @@ export default async function ArchivePage({ params }: Props) {
             title="Zahnärzte in anderen Bundesländern"
             pills={relatedRegions
               .filter((r): r is { region: string } => r.region !== null && slugifyRegion(r.region) !== slug)
-              .map(r => ({ label: r.region, href: `/zahnarzt/${slugifyRegion(r.region)}` }))}
+              .map(r => ({ label: normalizeRegionName(r.region), href: `/zahnarzt/${slugifyRegion(r.region)}` }))}
           />
         </div>
       </>

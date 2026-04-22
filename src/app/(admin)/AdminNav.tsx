@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, MapPin, FileText, Settings, LayoutDashboard, Upload, Star, ImageIcon, CalendarDays, BookOpen } from "lucide-react";
+import { Users, MapPin, FileText, Settings, LayoutDashboard, Upload, Star, ImageIcon, CalendarDays, BookOpen, Layers } from "lucide-react";
 
 const adminNav = [
   { href: "/admin",              label: "Dashboard",         Icon: LayoutDashboard },
@@ -13,6 +13,7 @@ const adminNav = [
   { href: "/admin/logos-media",  label: "Logos & Media",     Icon: ImageIcon },
   { href: "/admin/events",       label: "Events & Webinare", Icon: CalendarDays },
   { href: "/admin/bibliothek",   label: "Bibliothek",        Icon: BookOpen },
+  { href: "/admin/seiten",       label: "Seiten",            Icon: Layers },
   { href: "/admin/settings",     label: "Einstellungen",     Icon: Settings },
 ];
 

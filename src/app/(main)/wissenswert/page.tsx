@@ -7,11 +7,8 @@ export const metadata: Metadata = {
   description: "Artikel, Interviews und Neuigkeiten rund um Zahnimplantate und die CleanImplant-Zertifizierung.",
 };
 
-// Aktuell werden NUR diese drei Beiträge auf der Übersichtsseite angezeigt.
-// Die anderen Beiträge bleiben in der DB (und sind weiterhin per Direkt-URL
-// erreichbar), erscheinen aber nicht im Grid. Um alle wieder einzublenden,
-// VISIBLE_SLUGS auf null setzen (siehe getPosts unten).
-const VISIBLE_SLUGS: string[] | null = [
+// Diese drei Beiträge werden immer oben angezeigt (in dieser Reihenfolge).
+const PINNED_SLUGS = [
   "wie-funktioniert-ein-implantat",
   "vorteile-implantatversorgung",
   "zahnimplantate-unterschiede",
@@ -28,25 +25,25 @@ async function getPosts() {
     publishedAt: true,
   };
 
-  // Wenn VISIBLE_SLUGS null ist: alle veröffentlichten Beiträge anzeigen.
-  if (VISIBLE_SLUGS === null) {
-    return prisma.post.findMany({
-      where: { published: true },
+  const [pinned, rest] = await Promise.all([
+    prisma.post.findMany({
+      where: { published: true, slug: { in: PINNED_SLUGS } },
+      select,
+    }),
+    prisma.post.findMany({
+      where: { published: true, slug: { notIn: PINNED_SLUGS } },
       select,
       orderBy: { publishedAt: "desc" },
-    });
-  }
+    }),
+  ]);
 
-  // Sonst: nur die in VISIBLE_SLUGS gelisteten Beiträge, in exakt dieser Reihenfolge.
-  const posts = await prisma.post.findMany({
-    where: { published: true, slug: { in: VISIBLE_SLUGS } },
-    select,
-  });
-
-  const bySlug = new Map(posts.map((p) => [p.slug, p]));
-  return VISIBLE_SLUGS
-    .map((slug) => bySlug.get(slug))
+  // Pinned-Beiträge in der Reihenfolge von PINNED_SLUGS sortieren
+  const pinnedBySlug = new Map(pinned.map((p) => [p.slug, p]));
+  const pinnedOrdered = PINNED_SLUGS
+    .map((slug) => pinnedBySlug.get(slug))
     .filter((p): p is NonNullable<typeof p> => p !== undefined);
+
+  return [...pinnedOrdered, ...rest];
 }
 
 export default async function WissenswertPage() {

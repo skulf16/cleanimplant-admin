@@ -46,6 +46,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/faq`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
     { url: `${BASE_URL}/wissenswert`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
     { url: `${BASE_URL}/kontakt`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.4 },
+
+    // Lokale SEO-Landingpages (eine pro Stadt)
+    { url: `${BASE_URL}/implantologe-berlin`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.85 },
   ];
 
   const countryPages: MetadataRoute.Sitemap = countryCodes

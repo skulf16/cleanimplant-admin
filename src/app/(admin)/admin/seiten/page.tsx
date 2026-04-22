@@ -383,17 +383,25 @@ function PageTable({ rows }: { rows: Row[] }) {
               )}
             </div>
           </div>
-          {row.href && (
-            <Link
-              href={row.href}
-              target={row.external ? "_blank" : undefined}
-              rel={row.external ? "noopener noreferrer" : undefined}
-              className="text-[12px] text-[#30A2F1] hover:underline flex items-center gap-1 shrink-0"
-            >
-              {row.hrefLabel ?? "Öffnen"}
-              {row.external && <ExternalLink size={11} />}
-            </Link>
-          )}
+          {row.href &&
+            (row.external ? (
+              <a
+                href={row.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[12px] text-[#30A2F1] hover:underline flex items-center gap-1 shrink-0"
+              >
+                {row.hrefLabel ?? "Öffnen"}
+                <ExternalLink size={11} />
+              </a>
+            ) : (
+              <Link
+                href={row.href}
+                className="text-[12px] text-[#30A2F1] hover:underline flex items-center gap-1 shrink-0"
+              >
+                {row.hrefLabel ?? "Öffnen"}
+              </Link>
+            ))}
         </div>
       ))}
     </div>

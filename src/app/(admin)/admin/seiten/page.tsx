@@ -257,8 +257,6 @@ export default async function SeitenUebersicht() {
               path: p.path,
               note: p.note,
               status: "live" as const,
-              href: `${MEMBER_BASE}${p.path}`,
-              external: true,
             }))}
           />
         </Subsection>

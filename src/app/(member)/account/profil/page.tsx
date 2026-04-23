@@ -13,6 +13,7 @@ export default async function ProfilPage() {
     where: { userId: session.user.id },
     include: {
       categories: { include: { category: true } },
+      socialLinks: true,
     },
     orderBy: { lastName: "asc" },
   });

@@ -173,8 +173,13 @@ const WEEK_DAYS: { key: string; label: string }[] = [
 type DayHours = { open: string; close: string; open2?: string; close2?: string; closed: boolean };
 type OpeningHoursMap = Record<string, DayHours>;
 
+type SocialLinkLite = { platform: string; url: string };
+
 type Props = {
-  doctor: DentistProfile & { categories?: { category: { id: string; name: string } }[] };
+  doctor: DentistProfile & {
+    categories?: { category: { id: string; name: string } }[];
+    socialLinks?: SocialLinkLite[];
+  };
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -253,6 +258,9 @@ export default function MemberDoctorForm({ doctor }: Props) {
 
   const hasTreatment = (slug: string) =>
     doctor?.treatments?.includes(slug) ?? false;
+
+  const socialUrl = (platform: string): string =>
+    doctor?.socialLinks?.find((l) => l.platform === platform)?.url ?? "";
 
   // ── Image state ──────────────────────────────────────────────────────────
   const [imageUrl, setImageUrl] = useState<string>(
@@ -369,6 +377,58 @@ export default function MemberDoctorForm({ doctor }: Props) {
             <p className="text-[11px] text-[#999] mt-1">
               Für automatische Öffnungszeiten (experimentell)
             </p>
+          </div>
+        </div>
+      </fieldset>
+
+      {/* ── Social Media ───────────────────────────────────────────── */}
+      <fieldset className="bg-white border border-[#e5e7eb] rounded-[6px] p-6">
+        <legend className="text-[13px] font-semibold text-[#555] tracking-wide px-2 mb-4">
+          Social Media
+        </legend>
+        <p className="text-[12px] text-[#888] mb-4">
+          Links zu Ihren Profilen auf sozialen Netzwerken. Leer lassen, wenn Sie kein Profil haben.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="label">Facebook</label>
+            <input
+              name="social_facebook"
+              type="url"
+              defaultValue={socialUrl("FACEBOOK")}
+              placeholder="https://facebook.com/..."
+              className="input"
+            />
+          </div>
+          <div>
+            <label className="label">Instagram</label>
+            <input
+              name="social_instagram"
+              type="url"
+              defaultValue={socialUrl("INSTAGRAM")}
+              placeholder="https://instagram.com/..."
+              className="input"
+            />
+          </div>
+          <div>
+            <label className="label">LinkedIn</label>
+            <input
+              name="social_linkedin"
+              type="url"
+              defaultValue={socialUrl("LINKEDIN")}
+              placeholder="https://linkedin.com/in/..."
+              className="input"
+            />
+          </div>
+          <div>
+            <label className="label">TikTok</label>
+            <input
+              name="social_tiktok"
+              type="url"
+              defaultValue={socialUrl("TIKTOK")}
+              placeholder="https://tiktok.com/@..."
+              className="input"
+            />
           </div>
         </div>
       </fieldset>

@@ -230,6 +230,30 @@ export async function updateMemberDoctor(id: string, formData: FormData) {
     },
   });
 
+  // ── Social Media Links (Facebook, Instagram, LinkedIn, TikTok) ────────────
+  const socialPlatforms = [
+    { platform: "FACEBOOK" as const,  field: "social_facebook"  },
+    { platform: "INSTAGRAM" as const, field: "social_instagram" },
+    { platform: "LINKEDIN" as const,  field: "social_linkedin"  },
+    { platform: "TIKTOK" as const,    field: "social_tiktok"    },
+  ];
+
+  for (const { platform, field } of socialPlatforms) {
+    const url = (formData.get(field) as string | null)?.trim() ?? "";
+    const existing = await prisma.socialLink.findFirst({
+      where: { dentistId: id, platform },
+    });
+    if (url) {
+      if (existing) {
+        await prisma.socialLink.update({ where: { id: existing.id }, data: { url } });
+      } else {
+        await prisma.socialLink.create({ data: { dentistId: id, platform, url } });
+      }
+    } else if (existing) {
+      await prisma.socialLink.delete({ where: { id: existing.id } });
+    }
+  }
+
   const updated = await prisma.dentistProfile.findUnique({
     where: { id },
     select: { slug: true, citySlug: true, country: true, region: true },

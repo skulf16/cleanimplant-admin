@@ -441,12 +441,22 @@ export default async function ImplantologeBerlinPage() {
 
       {/* ── FAQ ───────────────────────────────────────────────────────────── */}
       <section id="faq" style={{ background: CREME_LIGHT, padding: "60px 0 80px", scrollMarginTop: 100 }}>
+        <style>{`
+          .faq-item summary { list-style: none; }
+          .faq-item summary::-webkit-details-marker { display: none; }
+          .faq-item summary::marker { content: ""; }
+          .faq-chevron { transition: transform 0.25s ease; flex-shrink: 0; }
+          .faq-item[open] .faq-chevron { transform: rotate(180deg); }
+          .faq-item[open] { background: #fff; }
+          .faq-item:hover .faq-chevron { color: ${CORAL}; }
+        `}</style>
         <div style={contentWidth}>
           <h2 style={{ ...h2Style, margin: "0 0 24px" }}>Häufig gestellte Fragen</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {faqs.map((f, i) => (
               <details
                 key={i}
+                className="faq-item"
                 style={{
                   background: "#fff",
                   borderRadius: 8,
@@ -460,10 +470,28 @@ export default async function ImplantologeBerlinPage() {
                     fontWeight: 700,
                     fontSize: 16,
                     cursor: "pointer",
-                    listStyle: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 16,
                   }}
                 >
-                  {f.q}
+                  <span>{f.q}</span>
+                  <svg
+                    className="faq-chevron"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
                 </summary>
                 <p style={{ color: NAVY, fontSize: 15, lineHeight: 1.75, margin: "12px 0 0", opacity: 0.9 }}>
                   {f.a}

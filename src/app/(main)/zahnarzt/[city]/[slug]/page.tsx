@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { buildDoctorName } from "@/lib/utils";
 import { MapPin, Clock, MessageSquare } from "lucide-react";
+import SocialIcon from "@/components/doctor/SocialIcon";
 import GallerySlider from "@/components/doctor/GallerySlider";
 import ProfileTabs from "@/components/doctor/ProfileTabs";
 import ContactForm from "@/components/doctor/ContactForm";
@@ -462,6 +463,48 @@ export default async function DoctorProfilePage({ params, searchParams }: Props)
                   >
                     TERMIN ONLINE BUCHEN
                   </a>
+                )}
+
+                {/* Social Media Links */}
+                {doc.socialLinks.length > 0 && (
+                  <>
+                    <hr style={{ border: "none", borderTop: "1px solid #f0ede8", margin: "16px 0" }} />
+                    <div>
+                      <p style={{ color: "#F5907B", fontWeight: 600, fontSize: 18, marginBottom: 10 }}>
+                        Social Media
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {doc.socialLinks.map((link: { id: string; platform: string; url: string }) => {
+                          const label =
+                            ({ FACEBOOK: "Facebook", INSTAGRAM: "Instagram", LINKEDIN: "LinkedIn", YOUTUBE: "YouTube", TIKTOK: "TikTok", XING: "Xing" } as Record<string, string>)[link.platform]
+                            ?? link.platform;
+                          return (
+                            <a
+                              key={link.id}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer nofollow"
+                              aria-label={label}
+                              title={label}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: 38,
+                                height: 38,
+                                borderRadius: "50%",
+                                background: "#FEF9F5",
+                                border: "1px solid #f0ede8",
+                                textDecoration: "none",
+                              }}
+                            >
+                              <SocialIcon platform={link.platform} size={18} color="#00385E" />
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 <hr style={{ border: "none", borderTop: "1px solid #f0ede8", margin: "16px 0" }} />

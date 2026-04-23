@@ -467,14 +467,8 @@ export default async function DoctorProfilePage({ params, searchParams }: Props)
 
                 {/* Social Media Links */}
                 {doc.socialLinks.length > 0 && (
-                  <>
-                    <hr style={{ border: "none", borderTop: "1px solid #f0ede8", margin: "16px 0" }} />
-                    <div>
-                      <p style={{ color: "#F5907B", fontWeight: 600, fontSize: 18, marginBottom: 10 }}>
-                        Social Media
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {doc.socialLinks.map((link: { id: string; platform: string; url: string }) => {
+                  <div style={{ display: "flex", justifyContent: "flex-end", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+                    {doc.socialLinks.map((link: { id: string; platform: string; url: string }) => {
                           const label =
                             ({ FACEBOOK: "Facebook", INSTAGRAM: "Instagram", LINKEDIN: "LinkedIn", YOUTUBE: "YouTube", TIKTOK: "TikTok", XING: "Xing" } as Record<string, string>)[link.platform]
                             ?? link.platform;
@@ -502,9 +496,7 @@ export default async function DoctorProfilePage({ params, searchParams }: Props)
                             </a>
                           );
                         })}
-                      </div>
-                    </div>
-                  </>
+                  </div>
                 )}
 
                 <hr style={{ border: "none", borderTop: "1px solid #f0ede8", margin: "16px 0" }} />

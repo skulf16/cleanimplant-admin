@@ -149,7 +149,6 @@ enum SocialPlatform {
   LINKEDIN
   XING
   YOUTUBE
-  TIKTOK
 }
 
 // ─── Blog / Wissenswert ───────────────────────────────────────────────────────

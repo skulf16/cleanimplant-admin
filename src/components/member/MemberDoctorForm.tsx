@@ -420,16 +420,6 @@ export default function MemberDoctorForm({ doctor }: Props) {
               className="input"
             />
           </div>
-          <div>
-            <label className="label">TikTok</label>
-            <input
-              name="social_tiktok"
-              type="url"
-              defaultValue={socialUrl("TIKTOK")}
-              placeholder="https://tiktok.com/@..."
-              className="input"
-            />
-          </div>
         </div>
       </fieldset>
 

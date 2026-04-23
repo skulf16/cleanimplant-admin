@@ -235,7 +235,6 @@ export async function updateMemberDoctor(id: string, formData: FormData) {
     { platform: "FACEBOOK" as const,  field: "social_facebook"  },
     { platform: "INSTAGRAM" as const, field: "social_instagram" },
     { platform: "LINKEDIN" as const,  field: "social_linkedin"  },
-    { platform: "TIKTOK" as const,    field: "social_tiktok"    },
   ];
 
   for (const { platform, field } of socialPlatforms) {

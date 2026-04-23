@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { slugifyRegion } from "@/lib/region";
+import { BERLIN_DISTRICTS } from "@/lib/berlin-districts";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://mycleandent.de";
 
@@ -50,6 +51,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Lokale SEO-Landingpages (eine pro Stadt/Bezirk)
     { url: `${BASE_URL}/implantologe-berlin`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.85 },
     { url: `${BASE_URL}/implantologe-charlottenburg`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    ...BERLIN_DISTRICTS.map((d) => ({
+      url: `${BASE_URL}/implantologe-${d.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
   ];
 
   const countryPages: MetadataRoute.Sitemap = countryCodes

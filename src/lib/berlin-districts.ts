@@ -1,0 +1,298 @@
+// Daten-Definition aller Berliner Bezirks-Landingpages.
+//
+// Der Inhalt der /implantologe-<bezirk>-Seiten wird aus diesem Array
+// gerendert (siehe BerlinDistrictPage-Komponente). Pro neuem Bezirk nur
+// hier eintragen + eine 3-zeilige page.tsx anlegen.
+
+export type BerlinDistrict = {
+  /** URL-Slug unter /implantologe-<slug> */
+  slug: string;
+  /** Fokus-Keyphrase (z. B. "Implantologe Friedrichshain") */
+  keyphrase: string;
+  /** Name des Bezirks/Ortsteils in Überschriften (z. B. "Friedrichshain", "Berlin-Mitte") */
+  districtName: string;
+  /** Übergeordneter Berliner Verwaltungsbezirk (z. B. "Friedrichshain-Kreuzberg") */
+  bezirk: string;
+  /** Präpositional-Beschreibung – wird eingesetzt in "…in dem trendigen Osten Berlins" */
+  regionDescription: string;
+  /** Bekannte Straßen / Plätze – wird eingesetzt in "…finden sich an der Frankfurter Allee und rund um den Boxhagener Platz" */
+  keyAddresses: string;
+  /** Gesamtpreis-Spanne für das Fazit / H2 Kostenabschnitt */
+  priceMin: string;
+  priceMax: string;
+  /** Implantat-Einzelpreis (Titan, inkl. Einsetzen) für die Kostentabelle */
+  implantPriceMin: string;
+  implantPriceMax: string;
+  /** Meta */
+  metaTitle: string;
+  metaDescription: string;
+  /** PLZ-Präfixe für den Doctor-Grid-Filter. Leer lassen → alle Berliner Ärzte. */
+  zipPrefixes?: string[];
+};
+
+export const BERLIN_DISTRICTS: BerlinDistrict[] = [
+  {
+    slug: "friedrichshain",
+    keyphrase: "Implantologe Friedrichshain",
+    districtName: "Friedrichshain",
+    bezirk: "Friedrichshain-Kreuzberg",
+    regionDescription: "dem trendigen Osten Berlins",
+    keyAddresses: "an der Frankfurter Allee und rund um den Boxhagener Platz",
+    priceMin: "1.600", priceMax: "3.500",
+    implantPriceMin: "950", implantPriceMax: "1.550",
+    metaTitle: "Implantologe Friedrichshain | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Friedrichshain finden: Zertifizierte Spezialisten in dem trendigen Osten Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["10243", "10245", "10247", "10249"],
+  },
+  {
+    slug: "hellersdorf",
+    keyphrase: "Implantologe Hellersdorf",
+    districtName: "Hellersdorf",
+    bezirk: "Marzahn-Hellersdorf",
+    regionDescription: "dem Südosten des Bezirks Marzahn-Hellersdorf",
+    keyAddresses: "am Hellersdorfer Anger und in der Helle Mitte",
+    priceMin: "1.500", priceMax: "3.200",
+    implantPriceMin: "900", implantPriceMax: "1.400",
+    metaTitle: "Implantologe Hellersdorf | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Hellersdorf finden: Zertifizierte Spezialisten in dem Südosten des Bezirks Marzahn-Hellersdorf. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["12619", "12621", "12623", "12627", "12629"],
+  },
+  {
+    slug: "koepenick",
+    keyphrase: "Implantologe Köpenick",
+    districtName: "Köpenick",
+    bezirk: "Treptow-Köpenick",
+    regionDescription: "dem idyllischen Südosten Berlins",
+    keyAddresses: "in der Köpenicker Altstadt und am Müggelsee",
+    priceMin: "1.500", priceMax: "3.200",
+    implantPriceMin: "900", implantPriceMax: "1.400",
+    metaTitle: "Implantologe Köpenick | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Köpenick finden: Zertifizierte Spezialisten in dem idyllischen Südosten Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["12524", "12526", "12527", "12555", "12557", "12559", "12587", "12589"],
+  },
+  {
+    slug: "kreuzberg",
+    keyphrase: "Implantologe Kreuzberg",
+    districtName: "Kreuzberg",
+    bezirk: "Friedrichshain-Kreuzberg",
+    regionDescription: "dem Szenebezirk im Herzen Berlins",
+    keyAddresses: "am Südstern und entlang der Bergmannstraße",
+    priceMin: "1.600", priceMax: "3.500",
+    implantPriceMin: "950", implantPriceMax: "1.550",
+    metaTitle: "Implantologe Kreuzberg | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Kreuzberg finden: Zertifizierte Spezialisten in dem Szenebezirk im Herzen Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["10961", "10963", "10965", "10967", "10969", "10997", "10999"],
+  },
+  {
+    slug: "lichtenberg",
+    keyphrase: "Implantologe Lichtenberg",
+    districtName: "Lichtenberg",
+    bezirk: "Lichtenberg",
+    regionDescription: "dem östlichen Berlin",
+    keyAddresses: "an der Frankfurter Allee und am Tierpark",
+    priceMin: "1.500", priceMax: "3.200",
+    implantPriceMin: "900", implantPriceMax: "1.400",
+    metaTitle: "Implantologe Lichtenberg | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Lichtenberg finden: Zertifizierte Spezialisten in dem östlichen Berlin. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["10315", "10317", "10318", "10319", "10365", "10367", "10369"],
+  },
+  {
+    slug: "marzahn",
+    keyphrase: "Implantologe Marzahn",
+    districtName: "Marzahn",
+    bezirk: "Marzahn-Hellersdorf",
+    regionDescription: "dem Nordosten Berlins",
+    keyAddresses: "am Helene-Weigel-Platz und in der Marzahner Promenade",
+    priceMin: "1.500", priceMax: "3.200",
+    implantPriceMin: "900", implantPriceMax: "1.400",
+    metaTitle: "Implantologe Marzahn | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Marzahn finden: Zertifizierte Spezialisten in dem Nordosten Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["12679", "12681", "12683", "12685", "12687", "12689"],
+  },
+  {
+    slug: "mitte",
+    keyphrase: "Implantologe Berlin Mitte",
+    districtName: "Berlin-Mitte",
+    bezirk: "Mitte",
+    regionDescription: "der Stadtmitte",
+    keyAddresses: "am Alexanderplatz und in der Friedrichstraße",
+    priceMin: "1.600", priceMax: "3.500",
+    implantPriceMin: "950", implantPriceMax: "1.550",
+    metaTitle: "Implantologe Berlin Mitte | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Berlin Mitte finden: Zertifizierte Spezialisten in der Stadtmitte. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["10115", "10117", "10119", "10178", "10179"],
+  },
+  {
+    slug: "moabit",
+    keyphrase: "Implantologe Moabit",
+    districtName: "Moabit",
+    bezirk: "Mitte",
+    regionDescription: "dem zentralen Nordwesten Berlins",
+    keyAddresses: "an der Turmstraße und am Kleinen Tiergarten",
+    priceMin: "1.600", priceMax: "3.500",
+    implantPriceMin: "950", implantPriceMax: "1.550",
+    metaTitle: "Implantologe Moabit | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Moabit finden: Zertifizierte Spezialisten in dem zentralen Nordwesten Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["10551", "10553", "10555", "10557", "10559"],
+  },
+  {
+    slug: "neukoelln",
+    keyphrase: "Implantologe Neukölln",
+    districtName: "Neukölln",
+    bezirk: "Neukölln",
+    regionDescription: "dem vielfältigen Süden Berlins",
+    keyAddresses: "am Hermannplatz und in der Karl-Marx-Straße",
+    priceMin: "1.600", priceMax: "3.500",
+    implantPriceMin: "950", implantPriceMax: "1.550",
+    metaTitle: "Implantologe Neukölln | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Neukölln finden: Zertifizierte Spezialisten in dem vielfältigen Süden Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["12043", "12045", "12047", "12049", "12051", "12053", "12055", "12057", "12059"],
+  },
+  {
+    slug: "pankow",
+    keyphrase: "Implantologe Pankow",
+    districtName: "Pankow",
+    bezirk: "Pankow",
+    regionDescription: "dem nördlichen Berlin",
+    keyAddresses: "in der Breiten Straße und am Pankower Anger",
+    priceMin: "1.600", priceMax: "3.500",
+    implantPriceMin: "950", implantPriceMax: "1.550",
+    metaTitle: "Implantologe Pankow | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Pankow finden: Zertifizierte Spezialisten in dem nördlichen Berlin. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["13156", "13187", "13189"],
+  },
+  {
+    slug: "prenzlauer-berg",
+    keyphrase: "Implantologe Prenzlauer Berg",
+    districtName: "Prenzlauer Berg",
+    bezirk: "Pankow",
+    regionDescription: "dem beliebten Nordosten Berlins",
+    keyAddresses: "am Kollwitzplatz und in der Schönhauser Allee",
+    priceMin: "1.600", priceMax: "3.500",
+    implantPriceMin: "950", implantPriceMax: "1.550",
+    metaTitle: "Implantologe Prenzlauer Berg | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Prenzlauer Berg finden: Zertifizierte Spezialisten in dem beliebten Nordosten Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["10405", "10407", "10409", "10435", "10437", "10439"],
+  },
+  {
+    slug: "reinickendorf",
+    keyphrase: "Implantologe Reinickendorf",
+    districtName: "Reinickendorf",
+    bezirk: "Reinickendorf",
+    regionDescription: "dem ruhigen Norden Berlins",
+    keyAddresses: "am Tegeler See und im Märkischen Viertel",
+    priceMin: "1.500", priceMax: "3.200",
+    implantPriceMin: "900", implantPriceMax: "1.400",
+    metaTitle: "Implantologe Reinickendorf | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Reinickendorf finden: Zertifizierte Spezialisten in dem ruhigen Norden Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["13403", "13405", "13407", "13409", "13435", "13437", "13439", "13465", "13467", "13469", "13507", "13509"],
+  },
+  {
+    slug: "schoeneberg",
+    keyphrase: "Implantologe Schöneberg",
+    districtName: "Schöneberg",
+    bezirk: "Tempelhof-Schöneberg",
+    regionDescription: "dem lebhaften Westteil Berlins",
+    keyAddresses: "am Nollendorfplatz und in der Hauptstraße",
+    priceMin: "1.600", priceMax: "3.500",
+    implantPriceMin: "950", implantPriceMax: "1.550",
+    metaTitle: "Implantologe Schöneberg | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Schöneberg finden: Zertifizierte Spezialisten in dem lebhaften Westteil Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["10777", "10779", "10781", "10783", "10823", "10825", "10827", "10829"],
+  },
+  {
+    slug: "spandau",
+    keyphrase: "Implantologe Spandau",
+    districtName: "Spandau",
+    bezirk: "Spandau",
+    regionDescription: "dem Berliner Westen",
+    keyAddresses: "in der Spandauer Altstadt und am Bahnhof Spandau",
+    priceMin: "1.500", priceMax: "3.200",
+    implantPriceMin: "900", implantPriceMax: "1.400",
+    metaTitle: "Implantologe Spandau | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Spandau finden: Zertifizierte Spezialisten in dem Berliner Westen. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["13581", "13583", "13585", "13587", "13589", "13591", "13593", "13595", "13597", "13599", "13627", "13629"],
+  },
+  {
+    slug: "steglitz",
+    keyphrase: "Implantologe Steglitz",
+    districtName: "Steglitz",
+    bezirk: "Steglitz-Zehlendorf",
+    regionDescription: "dem ruhigen Südwesten Berlins",
+    keyAddresses: "am Walther-Schreiber-Platz und im Steglitzer Damm",
+    priceMin: "1.600", priceMax: "3.500",
+    implantPriceMin: "950", implantPriceMax: "1.550",
+    metaTitle: "Implantologe Steglitz | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Steglitz finden: Zertifizierte Spezialisten in dem ruhigen Südwesten Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["12157", "12163", "12165", "12167", "12169", "12203", "12205", "12207", "12209", "12247", "12249"],
+  },
+  {
+    slug: "tempelhof",
+    keyphrase: "Implantologe Tempelhof",
+    districtName: "Tempelhof",
+    bezirk: "Tempelhof-Schöneberg",
+    regionDescription: "dem zentralen Süden Berlins",
+    keyAddresses: "am Tempelhofer Damm und am Ullsteinhaus",
+    priceMin: "1.600", priceMax: "3.500",
+    implantPriceMin: "950", implantPriceMax: "1.550",
+    metaTitle: "Implantologe Tempelhof | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Tempelhof finden: Zertifizierte Spezialisten in dem zentralen Süden Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["12101", "12103", "12105", "12107", "12109"],
+  },
+  {
+    slug: "treptow",
+    keyphrase: "Implantologe Treptow",
+    districtName: "Treptow",
+    bezirk: "Treptow-Köpenick",
+    regionDescription: "dem südöstlichen Berlin",
+    keyAddresses: "am Treptower Park und an der Spree",
+    priceMin: "1.500", priceMax: "3.200",
+    implantPriceMin: "900", implantPriceMax: "1.400",
+    metaTitle: "Implantologe Treptow | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Treptow finden: Zertifizierte Spezialisten in dem südöstlichen Berlin. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["12435", "12437", "12439", "12459", "12487", "12489"],
+  },
+  {
+    slug: "wedding",
+    keyphrase: "Implantologe Wedding",
+    districtName: "Wedding",
+    bezirk: "Mitte",
+    regionDescription: "dem aufstrebenden Norden Berlins",
+    keyAddresses: "am Leopoldplatz und in der Müllerstraße",
+    priceMin: "1.600", priceMax: "3.500",
+    implantPriceMin: "950", implantPriceMax: "1.550",
+    metaTitle: "Implantologe Wedding | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Wedding finden: Zertifizierte Spezialisten in dem aufstrebenden Norden Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["13347", "13349", "13351", "13353", "13357", "13359"],
+  },
+  {
+    slug: "wilmersdorf",
+    keyphrase: "Implantologe Wilmersdorf",
+    districtName: "Wilmersdorf",
+    bezirk: "Charlottenburg-Wilmersdorf",
+    regionDescription: "dem ruhigeren Westteil Berlins",
+    keyAddresses: "am Bundesplatz und entlang der Berliner Straße",
+    priceMin: "1.600", priceMax: "3.500",
+    implantPriceMin: "950", implantPriceMax: "1.550",
+    metaTitle: "Implantologe Wilmersdorf | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Wilmersdorf finden: Zertifizierte Spezialisten in dem ruhigeren Westteil Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["10707", "10709", "10711", "10713", "10715", "10717", "10719", "14193"],
+  },
+  {
+    slug: "zehlendorf",
+    keyphrase: "Implantologe Zehlendorf",
+    districtName: "Zehlendorf",
+    bezirk: "Steglitz-Zehlendorf",
+    regionDescription: "dem grünen Südwesten Berlins",
+    keyAddresses: "in der Zehlendorfer Mitte und am S-Bahnhof Zehlendorf",
+    priceMin: "1.600", priceMax: "3.500",
+    implantPriceMin: "950", implantPriceMax: "1.550",
+    metaTitle: "Implantologe Zehlendorf | Zertifiziert & geprüft",
+    metaDescription: "Implantologe Zehlendorf finden: Zertifizierte Spezialisten in dem grünen Südwesten Berlins. Jetzt passende Praxis entdecken.",
+    zipPrefixes: ["14109", "14129", "14163", "14165", "14167", "14169", "14195"],
+  },
+];
+
+export function findDistrict(slug: string): BerlinDistrict | undefined {
+  return BERLIN_DISTRICTS.find((d) => d.slug === slug);
+}

@@ -37,13 +37,45 @@ export default function ContactForm({ practiceEmail, practiceName }: Props) {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    // Manuelle Validierung – die Felder sind zwar als `required` markiert,
+    // aber weil das <form> `noValidate` nutzt (damit wir eigene Fehler-UI
+    // zeigen können), müssen wir hier selbst prüfen.
+    const firstNameTrim = firstName.trim();
+    const lastNameTrim = lastName.trim();
+    const emailTrim = email.trim();
+    const phoneTrim = phone.trim();
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrim);
+
+    if (!firstNameTrim) {
+      setStatus("error");
+      setErrorMsg("Bitte geben Sie Ihren Vornamen an.");
+      return;
+    }
+    if (!lastNameTrim) {
+      setStatus("error");
+      setErrorMsg("Bitte geben Sie Ihren Nachnamen an.");
+      return;
+    }
+    if (!emailOk) {
+      setStatus("error");
+      setErrorMsg("Bitte geben Sie eine gültige E-Mail-Adresse an.");
+      return;
+    }
+    if (radio === "rueckruf" && !phoneTrim) {
+      setStatus("error");
+      setErrorMsg("Für einen Rückruf benötigen wir Ihre Telefonnummer.");
+      return;
+    }
+
     setStatus("sending");
+    setErrorMsg("");
 
     const result = await sendContactEmail({
-      firstName,
-      lastName,
-      email,
-      phone: radio === "rueckruf" ? phone : undefined,
+      firstName: firstNameTrim,
+      lastName: lastNameTrim,
+      email: emailTrim,
+      phone: radio === "rueckruf" ? phoneTrim : undefined,
       requestType: radio,
       practiceEmail,
       practiceName,

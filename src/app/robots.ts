@@ -1,8 +1,21 @@
 import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
+import { AI_BOT_USER_AGENTS } from "@/lib/bot-detection";
 
 const PUBLIC_BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL || "https://www.mycleandent.de";
+
+const PUBLIC_DISALLOW = [
+  "/login",
+  "/forgot",
+  "/register",
+  "/reset",
+  "/account",
+  "/account/",
+  "/admin",
+  "/admin/",
+  "/api/",
+];
 
 /**
  * robots.txt wird je nach aufrufender Subdomain unterschiedlich ausgeliefert:
@@ -26,24 +39,17 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     };
   }
 
-  // Öffentliche Seite
+  // Öffentliche Seite – Standard-Wildcard plus explizite Erlaubnis für KI-Crawler.
+  // Manche SEO-/AI-Audit-Tools prüfen gezielt auf einzelne User-Agent-Einträge,
+  // statt sich auf den `*`-Fallback zu verlassen.
   return {
     rules: [
-      {
-        userAgent: "*",
+      { userAgent: "*", allow: "/", disallow: PUBLIC_DISALLOW },
+      ...AI_BOT_USER_AGENTS.map((ua) => ({
+        userAgent: ua,
         allow: "/",
-        disallow: [
-          "/login",
-          "/forgot",
-          "/register",
-          "/reset",
-          "/account",
-          "/account/",
-          "/admin",
-          "/admin/",
-          "/api/",
-        ],
-      },
+        disallow: PUBLIC_DISALLOW,
+      })),
     ],
     sitemap: `${PUBLIC_BASE_URL}/sitemap.xml`,
     host: PUBLIC_BASE_URL,

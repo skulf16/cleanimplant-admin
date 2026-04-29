@@ -4,6 +4,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { slugifyRegion, normalizeRegionName } from "@/lib/region";
 import DoctorCard from "@/components/directory/DoctorCard";
+import CityContentBlock, { buildCityFaqJsonLd } from "@/components/directory/CityContentBlock";
 import type { DentistWithRelations } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -273,6 +274,8 @@ export default async function ArchivePage({ params }: Props) {
   const countryCode = doctors[0].country ?? "DE";
   const countrySlug = COUNTRY_SLUG_MAP[countryCode] ?? null;
   const countryName = COUNTRY_NAME_MAP[countryCode] ?? null;
+  const regionRaw = doctors[0].region;
+  const regionDisplay = regionRaw ? normalizeRegionName(regionRaw) : null;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -287,9 +290,12 @@ export default async function ArchivePage({ params }: Props) {
     })),
   };
 
+  const faqLd = buildCityFaqJsonLd(cityName, doctors.length);
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <HeroSection
         breadcrumb={[
           ...(countrySlug && countryName ? [{ label: countryName, href: `/zahnarzt/${countrySlug}` }] : []),
@@ -305,6 +311,13 @@ export default async function ArchivePage({ params }: Props) {
           pills={relatedCities.map(c => ({ label: c.city ?? c.citySlug, href: `/zahnarzt/${c.citySlug}` }))}
         />
       </div>
+      <CityContentBlock
+        cityName={cityName}
+        citySlug={slug}
+        doctorCount={doctors.length}
+        countryName={countryName}
+        regionName={regionDisplay}
+      />
     </>
   );
 }
